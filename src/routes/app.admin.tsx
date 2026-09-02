@@ -5,10 +5,9 @@ import { PageHeader } from "@/components/app-shell";
 import { BirthdayPanel } from "@/components/birthday-panel";
 import { BirthdayPopup } from "@/components/birthday-popup";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Users, Clock, CalendarDays, Home, ArrowRight } from "lucide-react";
+import { Users, Clock, CalendarDays, ArrowRight } from "lucide-react";
 import { getUpcomingBirthdays, isBirthdayToday } from "@/lib/birthday";
 import { StatusBadge } from "./app.dashboard";
-import { WFHEmployeesCard } from "@/components/WFHEmployeesCard";
 
 export const Route = createFileRoute("/app/admin")({
   component: AdminLayout,
@@ -68,7 +67,6 @@ function AdminOverview() {
   const todayString = today.toISOString().slice(0, 10);
   const presentToday = state.attendance.filter((a) => a.date === todayString).length;
   const pendingLeaves = state.leaves.filter((l) => l.status === "pending");
-  const pendingWfh = state.wfh.filter((w) => w.status === "pending");
 
   const userById = (id: string) => state.users.find((u) => u.id === id);
 
@@ -79,7 +77,7 @@ function AdminOverview() {
         description="Snapshot of attendance and pending requests."
       />
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <Stat
           label="Total employees"
           value={employees.length}
@@ -95,10 +93,9 @@ function AdminOverview() {
           value={pendingLeaves.length}
           icon={<CalendarDays className="h-4 w-4" />}
         />
-        <Stat label="Pending WFH" value={pendingWfh.length} icon={<Home className="h-4 w-4" />} />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-4 gap-4 mt-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-6">
         <BirthdayPanel title="Upcoming Birthdays" employees={upcomingBirthdays} highlightToday />
 
         <Card>
@@ -131,39 +128,6 @@ function AdminOverview() {
             })}
           </CardContent>
         </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle className="text-base">Pending WFH requests</CardTitle>
-            <Link
-              to="/app/admin/approvals"
-              className="text-xs text-primary inline-flex items-center gap-1"
-            >
-              View all <ArrowRight className="h-3 w-3" />
-            </Link>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            {pendingWfh.length === 0 && (
-              <div className="text-sm text-muted-foreground">No pending WFH requests.</div>
-            )}
-            {pendingWfh.slice(0, 5).map((w) => {
-              const u = userById(w.userId);
-              return (
-                <div key={w.id} className="flex items-center justify-between">
-                  <div className="text-sm">
-                    <div className="font-medium">{u?.name}</div>
-                    <div className="text-xs text-muted-foreground">
-                      {w.date} · {w.reason}
-                    </div>
-                  </div>
-                  <StatusBadge status={w.status} />
-                </div>
-              );
-            })}
-          </CardContent>
-        </Card>
-
-        <WFHEmployeesCard />
       </div>
 
       <BirthdayPopup

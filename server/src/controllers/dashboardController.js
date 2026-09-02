@@ -14,18 +14,12 @@ exports.overview = async (req, res) => {
     const todayDate = new Date();
     const today = getTodayDateString();
 
-    // Count both PRESENT and WFH as present employees
     const presentTodayCount = await Attendance.countDocuments({
       date: today,
-      status: { $in: ["PRESENT", "WFH"] },
+      status: "PRESENT",
     });
 
     const pendingLeavesCount = await Leave.countDocuments({ status: "PENDING" });
-
-    const wfhEmployees = await Attendance.find({ date: today, status: "WFH" })
-      .populate("employeeId", "employeeId name designation")
-      .sort({ checkInTime: -1 })
-      .lean();
 
     const presentEmployees = await Attendance.find({ date: today, status: "PRESENT" })
       .populate("employeeId", "employeeId name designation")
@@ -45,34 +39,9 @@ exports.overview = async (req, res) => {
       totalEmployees,
       presentTodayCount,
       presentEmployees: presentEmployees.length,
-      wfhEmployees,
-      wfhCount: wfhEmployees.length,
       pendingLeavesCount,
       upcomingBirthdays,
     });
-  } catch (err) {
-    console.error(err);
-    return sendError(res, "Server error");
-  }
-};
-
-exports.wfhToday = async (req, res) => {
-  try {
-    const today = getTodayDateString();
-    console.log("Today:", today);
-
-    const wfhEmployees = await Attendance.find({ date: today, status: "WFH" })
-      .populate("employeeId", "employeeId name designation")
-      .sort({ checkInTime: -1 })
-      .lean();
-
-    console.log("WFH Employees:", wfhEmployees);
-
-    if (!wfhEmployees || wfhEmployees.length === 0) {
-      return sendSuccess(res, "No employees working from home today", { records: [] });
-    }
-
-    return sendSuccess(res, "Today WFH employees", { records: wfhEmployees });
   } catch (err) {
     console.error(err);
     return sendError(res, "Server error");

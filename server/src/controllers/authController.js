@@ -47,7 +47,10 @@ exports.login = async (req, res) => {
       return sendError(res, "Validation failed", 400, { errors: errors.array() });
 
     const { email, password } = req.body;
-    const user = await Employee.findOne({ email });
+    const cleanEmail = email ? email.trim() : "";
+    const user = await Employee.findOne({
+      email: { $regex: new RegExp(`^${cleanEmail.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}$`, "i") },
+    });
     if (!user) return sendError(res, "Invalid credentials", 400);
 
     const valid = await bcrypt.compare(password, user.password);

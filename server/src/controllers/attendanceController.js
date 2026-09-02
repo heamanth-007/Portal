@@ -45,14 +45,6 @@ exports.checkIn = async (req, res) => {
       return sendError(res, "You are on approved leave today. Cannot check in.", 400);
     }
 
-    // Check for approved WFH
-    const Wfh = require("../models/Wfh");
-    const activeWfh = await Wfh.findOne({
-      employeeId,
-      status: "APPROVED",
-      date: { $gte: startOfToday, $lte: endOfToday },
-    });
-
     // Geo-Fencing calculations
     const settings = await CompanySetting.findOne();
     let distance = 0;
@@ -70,15 +62,15 @@ exports.checkIn = async (req, res) => {
 
       outsideRadius = distance > settings.allowedRadius;
 
-      // Block check-in if outside AND geofencing is enforced AND they do NOT have approved WFH status
-      if (outsideRadius && settings.enforceGeofencing && !activeWfh) {
+      // Block check-in if outside AND geofencing is enforced
+      if (outsideRadius && settings.enforceGeofencing) {
         return sendError(res, "You are outside the company location. Check-In not allowed.", 400);
       }
     }
 
     const ipAddress =
       req.headers["x-forwarded-for"] || req.ip || req.socket.remoteAddress || "Unknown IP";
-    const status = activeWfh ? "WFH" : "PRESENT";
+    const status = "PRESENT";
 
     let attendance = await Attendance.findOne({ employeeId, date });
     if (attendance) {
@@ -247,7 +239,6 @@ exports.myMonthlySummaries = async (req, res) => {
     let totalWorkedDays = 0;
     let totalPresent = 0;
     let totalAbsent = 0;
-    let totalWfh = 0;
     let totalLeave = 0;
     let totalHoliday = 0;
     let totalHours = 0;
@@ -255,9 +246,6 @@ exports.myMonthlySummaries = async (req, res) => {
     records.forEach((record) => {
       if (record.status === "PRESENT") {
         totalPresent += 1;
-        totalWorkedDays += 1;
-      } else if (record.status === "WFH") {
-        totalWfh += 1;
         totalWorkedDays += 1;
       } else if (record.status === "ABSENT") {
         totalAbsent += 1;
@@ -280,7 +268,6 @@ exports.myMonthlySummaries = async (req, res) => {
       totalWorkedDays,
       totalPresent,
       totalAbsent,
-      totalWfh,
       totalLeave,
       totalHoliday,
       totalHours: parseFloat(totalHours.toFixed(2)),
@@ -371,51 +358,6 @@ exports.allForAdmin = async (req, res) => {
   }
 };
 
-exports.wfhTodayForAdmin = async (req, res) => {
-  try {
-    const date = getTodayDateString();
-
-    const records = await Attendance.aggregate([
-      {
-        $match: {
-          date: date,
-          status: "WFH",
-        },
-      },
-      {
-        $lookup: {
-          from: "employees",
-          localField: "employeeId",
-          foreignField: "_id",
-          as: "employeeDetails",
-        },
-      },
-      {
-        $unwind: "$employeeDetails",
-      },
-      {
-        $sort: {
-          checkInTime: -1,
-        },
-      },
-      {
-        $project: {
-          employeeId: "$employeeDetails._id",
-          name: "$employeeDetails.name",
-          designation: "$employeeDetails.designation",
-          status: 1,
-          checkInTime: 1,
-        },
-      },
-    ]);
-
-    return sendSuccess(res, "Today WFH employees", { records });
-  } catch (err) {
-    console.error(err);
-    return sendError(res, "Server error");
-  }
-};
-
 exports.generateMonthlySummary = async (req, res) => {
   try {
     const { month, year } = req.body;
@@ -440,7 +382,6 @@ exports.generateMonthlySummary = async (req, res) => {
           totalWorkedDays: 0,
           totalPresent: 0,
           totalAbsent: 0,
-          totalWfh: 0,
           totalLeave: 0,
           totalHoliday: 0,
           totalHours: 0,
@@ -450,9 +391,6 @@ exports.generateMonthlySummary = async (req, res) => {
       const sum = summaryMap[empId];
       if (record.status === "PRESENT") {
         sum.totalPresent += 1;
-        sum.totalWorkedDays += 1;
-      } else if (record.status === "WFH") {
-        sum.totalWfh += 1;
         sum.totalWorkedDays += 1;
       } else if (record.status === "ABSENT") {
         sum.totalAbsent += 1;

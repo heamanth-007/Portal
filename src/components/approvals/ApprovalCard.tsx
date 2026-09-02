@@ -26,10 +26,8 @@ export function ApprovalCard({ request, onApprove, onReject, isPending }: Approv
             <p className="text-xs text-muted-foreground">{empDesignation}</p>
           </div>
           <div className="ml-2">
-            <span
-              className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${request.requestType === "LEAVE" ? "bg-orange-100 text-orange-700" : "bg-blue-100 text-blue-700"}`}
-            >
-              {request.requestType}
+            <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-orange-100 text-orange-700">
+              LEAVE
             </span>
           </div>
         </div>

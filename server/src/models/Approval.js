@@ -3,7 +3,7 @@ const mongoose = require("mongoose");
 const approvalSchema = new mongoose.Schema(
   {
     employeeId: { type: mongoose.Schema.Types.ObjectId, ref: "Employee", required: true },
-    requestType: { type: String, enum: ["LEAVE", "WFH"], required: true },
+    requestType: { type: String, enum: ["LEAVE"], required: true },
     fromDate: { type: Date, required: true },
     toDate: { type: Date, required: true },
     reason: { type: String },

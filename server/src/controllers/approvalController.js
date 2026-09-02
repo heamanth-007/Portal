@@ -1,5 +1,4 @@
 const Leave = require("../models/Leave");
-const Wfh = require("../models/Wfh");
 const Attendance = require("../models/Attendance");
 const Approval = require("../models/Approval");
 const { sendSuccess, sendError } = require("../utils/response");
@@ -14,8 +13,7 @@ const formatDateString = (d) => {
 
 exports.getPendingApprovals = async (req, res) => {
   try {
-    // Fetch pending approvals from approvals collection
-    const approvals = await Approval.find({ status: "PENDING" })
+    const approvals = await Approval.find({ status: "PENDING", requestType: "LEAVE" })
       .populate("employeeId", "name designation")
       .lean();
 
@@ -40,8 +38,10 @@ exports.getPendingApprovals = async (req, res) => {
 
 exports.getApprovedRequests = async (req, res) => {
   try {
-    // Fetch approved & rejected approvals from approvals collection
-    const approvals = await Approval.find({ status: { $in: ["APPROVED", "REJECTED"] } })
+    const approvals = await Approval.find({
+      status: { $in: ["APPROVED", "REJECTED"] },
+      requestType: "LEAVE",
+    })
       .populate("employeeId", "name designation")
       .populate("approvedBy", "name")
       .populate("rejectedBy", "name")
@@ -76,25 +76,14 @@ exports.approveRequest = async (req, res) => {
   try {
     const { id } = req.params;
 
-    // Accept either an Approval id or a direct Leave/WFH id.
     let approval = await Approval.findById(id);
     let request = null;
-    let sourceType = null;
     if (approval) {
-      sourceType = approval.requestType;
       if (approval.sourceId) {
-        if (sourceType === "LEAVE") request = await Leave.findById(approval.sourceId);
-        else request = await Wfh.findById(approval.sourceId);
+        request = await Leave.findById(approval.sourceId);
       }
     } else {
-      // treat id as source id
       request = await Leave.findById(id);
-      sourceType = "LEAVE";
-      if (!request) {
-        request = await Wfh.findById(id);
-        sourceType = "WFH";
-      }
-      // try to find approval by source
       if (request) approval = await Approval.findOne({ sourceId: request._id });
     }
 
@@ -109,15 +98,13 @@ exports.approveRequest = async (req, res) => {
     request.approvedAt = new Date();
     await request.save();
 
-    // Update or create Approval document linked to this source
     if (!approval) approval = await Approval.findOne({ sourceId: request._id });
     if (!approval) {
-      // create approval record
       approval = new Approval({
         employeeId: request.employeeId,
-        requestType: sourceType,
-        fromDate: sourceType === "LEAVE" ? request.fromDate : request.date,
-        toDate: sourceType === "LEAVE" ? request.toDate : request.date,
+        requestType: "LEAVE",
+        fromDate: request.fromDate,
+        toDate: request.toDate,
         reason: request.reason,
         status: "APPROVED",
         appliedDate: request.createdAt || new Date(),
@@ -133,9 +120,8 @@ exports.approveRequest = async (req, res) => {
       await approval.save();
     }
 
-    // If it's a Leave request, create attendance records for the leave days
+    // Create attendance records for the leave days
     if (request.fromDate && request.toDate) {
-      // Leave model: fromDate/toDate
       let cur = new Date(request.fromDate);
       const end = new Date(request.toDate);
       while (cur <= end) {
@@ -154,21 +140,6 @@ exports.approveRequest = async (req, res) => {
         }
         cur.setDate(cur.getDate() + 1);
       }
-    } else if (request.date) {
-      // WFH model: single date
-      const dateStr = formatDateString(request.date);
-      let attendance = await Attendance.findOne({ employeeId: request.employeeId, date: dateStr });
-      if (!attendance) {
-        attendance = new Attendance({
-          employeeId: request.employeeId,
-          date: dateStr,
-          status: "WFH",
-        });
-        await attendance.save();
-      } else if (!attendance.checkInTime) {
-        attendance.status = "WFH";
-        await attendance.save();
-      }
     }
 
     return sendSuccess(res, "Request approved successfully", { record: request });
@@ -182,17 +153,14 @@ exports.rejectRequest = async (req, res) => {
   try {
     const { id } = req.params;
 
-    // Accept Approval id or source id
     let approval = await Approval.findById(id);
     let request = null;
     if (approval) {
       if (approval.sourceId) {
         request = await Leave.findById(approval.sourceId);
-        if (!request) request = await Wfh.findById(approval.sourceId);
       }
     } else {
       request = await Leave.findById(id);
-      if (!request) request = await Wfh.findById(id);
       if (request) approval = await Approval.findOne({ sourceId: request._id });
     }
 
@@ -207,14 +175,13 @@ exports.rejectRequest = async (req, res) => {
     request.rejectedAt = new Date();
     await request.save();
 
-    // Update or create Approval record linked to this source
     if (!approval) approval = await Approval.findOne({ sourceId: request._id });
     if (!approval) {
       approval = new Approval({
         employeeId: request.employeeId,
-        requestType: request.fromDate && request.toDate ? "LEAVE" : "WFH",
-        fromDate: request.fromDate || request.date,
-        toDate: request.toDate || request.date,
+        requestType: "LEAVE",
+        fromDate: request.fromDate,
+        toDate: request.toDate,
         reason: request.reason,
         status: "REJECTED",
         appliedDate: request.createdAt || new Date(),
@@ -230,9 +197,8 @@ exports.rejectRequest = async (req, res) => {
       await approval.save();
     }
 
-    // Cleanup any auto-created attendance records (only if no check-in exists)
+    // Cleanup any auto-created attendance records
     if (request.fromDate && request.toDate) {
-      // Leave: remove LEAVE attendance if exists and no check-in
       let cur = new Date(request.fromDate);
       const end = new Date(request.toDate);
       while (cur <= end) {
@@ -245,14 +211,6 @@ exports.rejectRequest = async (req, res) => {
         });
         cur.setDate(cur.getDate() + 1);
       }
-    } else if (request.date) {
-      const dateStr = formatDateString(request.date);
-      await Attendance.deleteOne({
-        employeeId: request.employeeId,
-        date: dateStr,
-        status: "WFH",
-        checkInTime: { $exists: false },
-      });
     }
 
     return sendSuccess(res, "Request rejected successfully", { record: request });

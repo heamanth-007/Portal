@@ -42,7 +42,7 @@ export interface EmployeeDetails {
 export interface ApprovalRequest {
   _id: string;
   employeeId: EmployeeDetails;
-  requestType: "LEAVE" | "WFH";
+  requestType: "LEAVE";
   fromDate: string;
   toDate: string;
   reason: string;

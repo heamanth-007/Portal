@@ -18,7 +18,7 @@ export function ApprovalsPage() {
     <div className="p-6 sm:p-8 max-w-5xl mx-auto">
       <PageHeader
         title="Admin Approvals Management"
-        description="Review and manage employee leave and WFH requests."
+        description="Review and manage employee leave requests."
       />
 
       <Tabs value={tab} onValueChange={setTab} className="mt-6">

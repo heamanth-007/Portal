@@ -33,35 +33,7 @@ exports.leaveApplyValidation = [
 exports.holidayValidation = [body("name").notEmpty(), body("date").notEmpty()];
 
 exports.attendanceMarkValidation = [
-  body("status").isIn(["PRESENT", "ABSENT", "LEAVE", "WFH"]).withMessage("Invalid status"),
-];
-
-exports.taskCreateValidation = [
-  body("title").notEmpty().withMessage("Task title is required").trim(),
-  body("priority")
-    .isIn(["Low", "Medium", "High"])
-    .withMessage("Priority must be Low, Medium, or High"),
-  body("assignedTo").isMongoId().withMessage("Assigned employee ID must be a valid ID"),
-  body("dueDate")
-    .notEmpty()
-    .withMessage("Due date is required")
-    .isISO8601()
-    .withMessage("Invalid due date format"),
-];
-
-exports.taskUpdateValidation = [
-  body("title").optional().notEmpty().withMessage("Task title cannot be empty").trim(),
-  body("priority")
-    .optional()
-    .isIn(["Low", "Medium", "High"])
-    .withMessage("Priority must be Low, Medium, or High"),
-  body("assignedTo").optional().isMongoId().withMessage("Assigned employee ID must be a valid ID"),
-  body("dueDate")
-    .optional()
-    .notEmpty()
-    .withMessage("Due date cannot be empty")
-    .isISO8601()
-    .withMessage("Invalid due date format"),
+  body("status").isIn(["PRESENT", "ABSENT", "LEAVE"]).withMessage("Invalid status"),
 ];
 
 exports.changePasswordValidation = [

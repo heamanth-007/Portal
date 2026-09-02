@@ -1,0 +1,87 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 580" width="100%" height="100%">
+  <defs>
+    <linearGradient id="mbOrangeGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FF5100" />
+      <stop offset="50%" stop-color="#F04200" />
+      <stop offset="100%" stop-color="#D92E00" />
+    </linearGradient>
+    <linearGradient id="mbLightGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#FF7A33" />
+      <stop offset="100%" stop-color="#E83B00" />
+    </linearGradient>
+    <filter id="subtleShadow" x="-5%" y="-5%" width="110%" height="110%">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#000000" flood-opacity="0.1" />
+    </filter>
+  </defs>
+
+  <!-- Background container -->
+  <rect width="100%" height="100%" fill="transparent" />
+
+  <g filter="url(#subtleShadow)">
+    <!-- Outer Hexagonal Frame -->
+    <path d="M 250 15 
+             L 475 145 
+             L 475 425 
+             L 475 485
+             L 25 485 
+             L 25 425 
+             L 25 145 Z" 
+          fill="none" 
+          stroke="url(#mbOrangeGrad)" 
+          stroke-width="12" 
+          stroke-linejoin="miter" 
+          stroke-miterlimit="4" />
+
+    <!-- Inner Hexagonal Frame -->
+    <path d="M 250 48 
+             L 445 160 
+             L 445 405 
+             L 250 405
+             L 55 405 
+             L 55 160 Z" 
+          fill="none" 
+          stroke="url(#mbOrangeGrad)" 
+          stroke-width="12" 
+          stroke-linejoin="miter" />
+
+    <!-- Stylized "M" and "B" Monogram -->
+    <!-- Left M Structure -->
+    <path d="M 90 190 
+             L 155 190 
+             L 155 330 
+             L 220 220 
+             L 248 220
+             L 248 375 
+             L 190 375 
+             L 190 280 
+             L 135 375 
+             L 90 375 Z" 
+          fill="url(#mbOrangeGrad)" />
+
+    <!-- Right B Structure with Inner Cutouts -->
+    <path d="M 258 190 
+             L 370 190 
+             C 415 190 415 260 375 272 
+             C 425 285 425 375 365 375 
+             L 258 375 Z
+             M 315 228 
+             L 315 265 
+             L 355 265 
+             C 372 265 372 228 355 228 Z
+             M 315 300 
+             L 315 338 
+             L 360 338 
+             C 378 338 378 300 360 300 Z" 
+          fill="url(#mbOrangeGrad)" 
+          fill-rule="evenodd" />
+
+    <!-- Bottom Text: MAHES BANKERS -->
+    <text x="250" y="542" 
+          text-anchor="middle" 
+          font-family="'Inter', 'Segoe UI', 'Arial Black', sans-serif" 
+          font-weight="900" 
+          font-size="44" 
+          letter-spacing="2" 
+          fill="url(#mbOrangeGrad)">MAHES BANKERS</text>
+  </g>
+</svg>

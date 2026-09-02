@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500" width="100%" height="100%">
+  <defs>
+    <linearGradient id="mbFavGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FF5100" />
+      <stop offset="100%" stop-color="#D92E00" />
+    </linearGradient>
+  </defs>
+  <rect width="100%" height="100%" rx="90" fill="#ffffff" />
+  <!-- Hexagon border -->
+  <path d="M 250 30 L 450 145 L 450 375 L 250 490 L 50 375 L 50 145 Z" fill="none" stroke="url(#mbFavGrad)" stroke-width="24" stroke-linejoin="miter" />
+  <!-- M and B monogram -->
+  <path d="M 110 180 L 170 180 L 170 310 L 225 210 L 250 210 L 250 350 L 200 350 L 200 270 L 150 350 L 110 350 Z" fill="url(#mbFavGrad)" />
+  <path d="M 260 180 L 360 180 C 400 180 400 245 365 255 C 410 268 410 350 355 350 L 260 350 Z M 310 215 L 310 248 L 345 248 C 360 248 360 215 345 215 Z M 310 280 L 310 315 L 350 315 C 365 315 365 280 350 280 Z" fill="url(#mbFavGrad)" fill-rule="evenodd" />
+</svg>

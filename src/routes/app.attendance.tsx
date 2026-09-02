@@ -115,7 +115,7 @@ function AttendancePage() {
   const [viewMode, setViewMode] = useState<"month" | "all">("all");
   const [month, setMonth] = useState(String(new Date().getMonth() + 1).padStart(2, "0"));
   const [year, setYear] = useState(String(new Date().getFullYear()));
-  const [statusFilter, setStatusFilter] = useState<"all" | "PRESENT" | "ABSENT" | "WFH" | "LEAVE" | "HOLIDAY">(
+  const [statusFilter, setStatusFilter] = useState<"all" | "PRESENT" | "ABSENT" | "LEAVE" | "HOLIDAY">(
     "all",
   );
 
@@ -318,7 +318,6 @@ function AttendancePage() {
     return calendarRecords.map((r) => {
       let color = "#9ca3af"; // default gray
       if (r.status === "PRESENT") color = "#22c55e";
-      if (r.status === "WFH") color = "#3b82f6";
       if (r.status === "LEAVE") color = "#eab308";
 
       return {
@@ -360,7 +359,7 @@ function AttendancePage() {
                     </span>
                     {todayRecord?.status && (
                       <span
-                        className={`w-3 h-3 rounded-full ${todayRecord.status === "PRESENT" ? "bg-green-500" : todayRecord.status === "WFH" ? "bg-blue-500" : "bg-red-500"}`}
+                        className={`w-3 h-3 rounded-full ${todayRecord.status === "PRESENT" ? "bg-green-500" : "bg-red-500"}`}
                       />
                     )}
                   </div>
@@ -551,7 +550,6 @@ function AttendancePage() {
                     <SelectItem value="all">All Status</SelectItem>
                     <SelectItem value="PRESENT">Present</SelectItem>
                     <SelectItem value="ABSENT">Absent</SelectItem>
-                    <SelectItem value="WFH">Work From Home</SelectItem>
                     <SelectItem value="LEAVE">Leave</SelectItem>
                     <SelectItem value="HOLIDAY">Holiday</SelectItem>
                   </SelectContent>
@@ -746,7 +744,6 @@ function AttendancePage() {
                   <TableRow>
                     <TableHead className="text-center">Worked Days</TableHead>
                     <TableHead className="text-center">Present</TableHead>
-                    <TableHead className="text-center">WFH</TableHead>
                     <TableHead className="text-center">Leave</TableHead>
                     <TableHead className="text-center">Holiday</TableHead>
                     <TableHead className="text-center">Absent</TableHead>
@@ -756,7 +753,7 @@ function AttendancePage() {
                 <TableBody>
                   {summaries.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={6} className="text-center text-muted-foreground py-10">
+                      <TableCell colSpan={5} className="text-center text-muted-foreground py-10">
                         No monthly summary generated yet for this period.
                       </TableCell>
                     </TableRow>
@@ -767,7 +764,6 @@ function AttendancePage() {
                         <TableCell className="text-center text-green-600">
                           {s.totalPresent}
                         </TableCell>
-                        <TableCell className="text-center text-blue-600">{s.totalWfh}</TableCell>
                         <TableCell className="text-center text-yellow-600">
                           {s.totalLeave}
                         </TableCell>

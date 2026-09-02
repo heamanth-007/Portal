@@ -21,7 +21,7 @@ function AdminSettings() {
   if (!currentUser) return <Navigate to="/login" />;
   if (currentUser.role !== "admin") return <Navigate to="/app/dashboard" />;
 
-  const [companyName, setCompanyName] = useState("Gemshine Infotech");
+  const [companyName, setCompanyName] = useState("Mahes Bankers");
   const [latitude, setLatitude] = useState<number>(28.6139);
   const [longitude, setLongitude] = useState<number>(77.209);
   const [allowedRadius, setAllowedRadius] = useState<number>(100);
@@ -36,7 +36,7 @@ function AdminSettings() {
       const res = await fetchAdminCompanySettings();
       if (res.data?.settings) {
         const s = res.data.settings;
-        setCompanyName(s.companyName || "Gemshine Infotech");
+        setCompanyName(s.companyName || "Mahes Bankers");
         setLatitude(Number(s.latitude) || 28.6139);
         setLongitude(Number(s.longitude) || 77.209);
         setAllowedRadius(Number(s.allowedRadius) || 100);

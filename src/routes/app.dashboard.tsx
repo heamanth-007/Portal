@@ -7,7 +7,7 @@ import { BirthdayPopup } from "@/components/birthday-popup";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Clock, CalendarDays, Home, CheckCircle2 } from "lucide-react";
+import { Clock, CalendarDays, CheckCircle2 } from "lucide-react";
 import { getUpcomingBirthdays, isBirthdayToday } from "@/lib/birthday";
 import { toast } from "sonner";
 
@@ -66,7 +66,6 @@ function EmployeeDashboard() {
     (a) => a.userId === currentUser.id && a.date === todayDate,
   );
   const myLeaves = state.leaves.filter((l) => l.userId === currentUser.id);
-  const myWfh = state.wfh.filter((w) => w.userId === currentUser.id);
 
   const status = todayAttendance
     ? todayAttendance.checkOut
@@ -81,7 +80,7 @@ function EmployeeDashboard() {
         description="Here's a snapshot of your day."
       />
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <StatCard
           label="Today"
           value={status}
@@ -97,11 +96,6 @@ function EmployeeDashboard() {
           label="Leave balance"
           value={`${currentUser.leaveBalance} days`}
           icon={<CalendarDays className="h-4 w-4" />}
-        />
-        <StatCard
-          label="WFH pending"
-          value={myWfh.filter((w) => w.status === "pending").length.toString()}
-          icon={<Home className="h-4 w-4" />}
         />
       </div>
 
@@ -155,10 +149,10 @@ function EmployeeDashboard() {
 
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Recent requests</CardTitle>
+            <CardTitle className="text-base">Recent leave requests</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
-            {myLeaves.slice(0, 3).map((l) => (
+            {myLeaves.slice(0, 5).map((l) => (
               <div key={l.id} className="flex items-center justify-between">
                 <div className="text-sm">
                   <div className="font-medium">Leave · {l.fromDate}</div>
@@ -167,17 +161,8 @@ function EmployeeDashboard() {
                 <StatusBadge status={l.status} />
               </div>
             ))}
-            {myWfh.slice(0, 2).map((w) => (
-              <div key={w.id} className="flex items-center justify-between">
-                <div className="text-sm">
-                  <div className="font-medium">WFH · {w.date}</div>
-                  <div className="text-xs text-muted-foreground truncate">{w.reason}</div>
-                </div>
-                <StatusBadge status={w.status} />
-              </div>
-            ))}
-            {myLeaves.length === 0 && myWfh.length === 0 && (
-              <div className="text-sm text-muted-foreground">No requests yet.</div>
+            {myLeaves.length === 0 && (
+              <div className="text-sm text-muted-foreground">No leave requests yet.</div>
             )}
           </CardContent>
         </Card>

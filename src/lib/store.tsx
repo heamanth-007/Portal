@@ -12,20 +12,16 @@ import {
   seedUsers,
   seedAttendance,
   seedLeaves,
-  seedWfh,
   seedMessages,
   seedHolidays,
   newId,
   type User,
   type AttendanceRecord,
   type LeaveRequest,
-  type WfhRequest,
   type ChatMessage,
   type LeaveStatus,
   type Holiday,
   type Role,
-  type Task,
-  type NotificationItem,
 } from "./mock-data";
 import * as api from "./api";
 import { io } from "socket.io-client";
@@ -38,11 +34,8 @@ interface AppState {
   users: User[];
   attendance: AttendanceRecord[];
   leaves: LeaveRequest[];
-  wfh: WfhRequest[];
   messages: ChatMessage[];
   holidays: Holiday[];
-  tasks: Task[];
-  notifications: NotificationItem[];
 }
 
 interface StoreContextValue {
@@ -56,20 +49,12 @@ interface StoreContextValue {
   checkIn: (userId: string) => Promise<void>;
   checkOut: (userId: string) => Promise<void>;
   applyLeave: (data: Omit<LeaveRequest, "id" | "status" | "createdAt">) => Promise<void>;
-  applyWfh: (data: Omit<WfhRequest, "id" | "status" | "createdAt">) => Promise<void>;
   setLeaveStatus: (id: string, status: LeaveStatus) => Promise<void>;
-  setWfhStatus: (id: string, status: LeaveStatus) => Promise<void>;
   sendMessage: (userId: string, text: string) => Promise<void>;
   addHoliday: (holiday: Omit<Holiday, "id">) => Promise<void>;
   updateHoliday: (id: string, holiday: Partial<Holiday>) => Promise<void>;
   deleteHoliday: (id: string) => Promise<void>;
   markMessagesAsRead: (userId: string) => Promise<void>;
-  createTask: (data: any) => Promise<void>;
-  updateTask: (id: string, data: any) => Promise<void>;
-  deleteTask: (id: string) => Promise<void>;
-  completeTask: (id: string) => Promise<void>;
-  markNotificationsAsRead: () => Promise<void>;
-  deleteNotification: (id: string) => Promise<void>;
 }
 
 const StoreContext = createContext<StoreContextValue | null>(null);
@@ -87,11 +72,8 @@ const initialState = (): AppState => {
     users: seedUsers,
     attendance: seedAttendance,
     leaves: seedLeaves,
-    wfh: seedWfh,
     messages: seedMessages,
     holidays: seedHolidays,
-    tasks: [],
-    notifications: [],
   };
 };
 
@@ -148,11 +130,10 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
   const loadRemoteState = useCallback(async () => {
     try {
-      const [holidays, messages, latestProfile, notifs] = await Promise.all([
+      const [holidays, messages, latestProfile] = await Promise.all([
         api.fetchHolidays(),
         api.fetchMessages(),
         api.fetchProfile(),
-        api.fetchNotifications(),
       ]);
 
       setCurrentUser((prev) => {
@@ -163,14 +144,11 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       });
 
       if (latestProfile.role === "admin") {
-        const [employeeList, pendingLeaves, pendingWfh, todayAttendance, adminTasks] =
-          await Promise.all([
-            api.fetchEmployees(),
-            api.fetchPendingLeaves(),
-            api.fetchPendingWfh(),
-            api.fetchTodayAttendance(),
-            api.fetchAdminTasks(),
-          ]);
+        const [employeeList, pendingLeaves, todayAttendance] = await Promise.all([
+          api.fetchEmployees(),
+          api.fetchPendingLeaves(),
+          api.fetchTodayAttendance(),
+        ]);
 
         setState((s) => ({
           ...s,
@@ -178,21 +156,16 @@ export function StoreProvider({ children }: { children: ReactNode }) {
           holidays: holidays.holidays,
           messages,
           leaves: pendingLeaves.leaves,
-          wfh: pendingWfh.wfh,
           attendance: todayAttendance.records,
-          tasks: adminTasks,
-          notifications: notifs,
         }));
       } else {
-        const [employeeList, myLeaves, myWfh, myAttendance, myTasks] = await Promise.all([
+        const [employeeList, myLeaves, myAttendance] = await Promise.all([
           api.fetchEmployees(),
           api.fetchMyLeaves(),
-          api.fetchMyWfh(),
           api.fetchMyAttendance(
             String(new Date().getMonth() + 1).padStart(2, "0"),
             String(new Date().getFullYear()),
           ),
-          api.fetchMyTasks(),
         ]);
 
         setState((s) => ({
@@ -201,10 +174,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
           holidays: holidays.holidays,
           messages,
           leaves: myLeaves.leaves,
-          wfh: myWfh.wfh,
           attendance: myAttendance.records,
-          tasks: myTasks,
-          notifications: notifs,
         }));
       }
     } catch (error) {
@@ -322,8 +292,6 @@ export function StoreProvider({ children }: { children: ReactNode }) {
             users: s.users.filter((u) => u.id !== id),
             attendance: s.attendance.filter((a) => a.userId !== id),
             leaves: s.leaves.filter((l) => l.userId !== id),
-            wfh: s.wfh.filter((w) => w.userId !== id),
-            tasks: s.tasks.filter((t) => t.assignedTo !== id),
           }));
         } catch (err) {
           console.error(err);
@@ -375,15 +343,6 @@ export function StoreProvider({ children }: { children: ReactNode }) {
           console.error(err);
         }
       },
-      applyWfh: async (data) => {
-        try {
-          await api.applyWfh(data);
-          const wfh = await api.fetchMyWfh();
-          setState((s) => ({ ...s, wfh: wfh.wfh }));
-        } catch (err) {
-          console.error(err);
-        }
-      },
       setLeaveStatus: async (id, status) => {
         try {
           if (status === "approved") await api.approveLeave(id);
@@ -391,18 +350,6 @@ export function StoreProvider({ children }: { children: ReactNode }) {
           setState((s) => ({
             ...s,
             leaves: s.leaves.map((l) => (l.id === id ? { ...l, status } : l)),
-          }));
-        } catch (err) {
-          console.error(err);
-        }
-      },
-      setWfhStatus: async (id, status) => {
-        try {
-          if (status === "approved") await api.approveWfh(id);
-          else await api.rejectWfh(id);
-          setState((s) => ({
-            ...s,
-            wfh: s.wfh.map((w) => (w.id === id ? { ...w, status } : w)),
           }));
         } catch (err) {
           console.error(err);
@@ -466,76 +413,6 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         try {
           await api.deleteHoliday(id);
           setState((s) => ({ ...s, holidays: s.holidays.filter((h) => h.id !== id) }));
-        } catch (err) {
-          console.error(err);
-        }
-      },
-      createTask: async (data) => {
-        try {
-          const newTask = await api.createTask(data);
-          setState((s) => ({
-            ...s,
-            tasks: [newTask, ...s.tasks],
-          }));
-        } catch (err) {
-          console.error(err);
-          throw err;
-        }
-      },
-      updateTask: async (id, data) => {
-        try {
-          const updatedTask = await api.updateTask(id, data);
-          setState((s) => ({
-            ...s,
-            tasks: s.tasks.map((t) => (t.id === id ? updatedTask : t)),
-          }));
-        } catch (err) {
-          console.error(err);
-          throw err;
-        }
-      },
-      deleteTask: async (id) => {
-        try {
-          await api.deleteTask(id);
-          setState((s) => ({
-            ...s,
-            tasks: s.tasks.filter((t) => t.id !== id),
-          }));
-        } catch (err) {
-          console.error(err);
-          throw err;
-        }
-      },
-      completeTask: async (id) => {
-        try {
-          const updatedTask = await api.completeTask(id);
-          setState((s) => ({
-            ...s,
-            tasks: s.tasks.map((t) => (t.id === id ? updatedTask : t)),
-          }));
-        } catch (err) {
-          console.error(err);
-          throw err;
-        }
-      },
-      markNotificationsAsRead: async () => {
-        try {
-          await api.markNotificationsAsRead();
-          setState((s) => ({
-            ...s,
-            notifications: s.notifications.map((n) => ({ ...n, isRead: true })),
-          }));
-        } catch (err) {
-          console.error(err);
-        }
-      },
-      deleteNotification: async (id) => {
-        try {
-          await api.deleteNotification(id);
-          setState((s) => ({
-            ...s,
-            notifications: s.notifications.filter((n) => n.id !== id),
-          }));
         } catch (err) {
           console.error(err);
         }

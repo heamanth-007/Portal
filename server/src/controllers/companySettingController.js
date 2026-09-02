@@ -7,7 +7,7 @@ exports.getSettings = async (req, res) => {
     if (!settings) {
       // Return a standard default settings object if none exists in MongoDB yet
       settings = {
-        companyName: "Gemshine Infotech",
+        companyName: "Mahes Bankers",
         latitude: 28.6139, // default Delhi/example coordinate
         longitude: 77.209,
         allowedRadius: 100,

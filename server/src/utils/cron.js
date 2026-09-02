@@ -2,10 +2,7 @@ const cron = require("node-cron");
 const Employee = require("../models/Employee");
 const Attendance = require("../models/Attendance");
 const Leave = require("../models/Leave");
-const Wfh = require("../models/Wfh");
 const Holiday = require("../models/Holiday");
-const Task = require("../models/Task");
-const Notification = require("../models/Notification");
 
 const getTodayDateString = () => {
   const d = new Date();
@@ -52,13 +49,6 @@ const initCronJobs = () => {
           toDate: { $gte: startOfToday },
         });
 
-        // Check if employee has approved WFH today
-        const activeWfh = await Wfh.findOne({
-          employeeId,
-          status: "APPROVED",
-          date: { $gte: startOfToday, $lte: endOfToday },
-        });
-
         // Check attendance record
         let attendance = await Attendance.findOne({ employeeId, date: today });
 
@@ -87,57 +77,6 @@ const initCronJobs = () => {
       console.log(`Cron: Attendance check completed for ${today}`);
     } catch (err) {
       console.error("Cron: Error running attendance check:", err);
-    }
-  });
-
-  // Run every day at 00:05 (12:05 AM) to check for overdue tasks and notify admins
-  cron.schedule("5 0 * * *", async () => {
-    try {
-      const todayStr = getTodayDateString();
-      console.log(`Cron: Running overdue tasks check for ${todayStr}`);
-
-      // Find all pending tasks that have due dates before today
-      const overdueTasks = await Task.find({
-        status: "Pending",
-        dueDate: { $lt: new Date(todayStr + "T00:00:00.000Z") },
-      }).populate("assignedTo", "name");
-
-      if (overdueTasks.length === 0) {
-        console.log("Cron: No overdue tasks found.");
-        return;
-      }
-
-      // Fetch all active admins
-      const admins = await Employee.find({ role: "ADMIN", status: "ACTIVE" });
-      if (admins.length === 0) {
-        console.log("Cron: No active admins found to notify.");
-        return;
-      }
-
-      for (const task of overdueTasks) {
-        // Check if an overdue notification already exists for this task
-        const existingNotif = await Notification.findOne({
-          type: "TASK_OVERDUE",
-          relatedId: task._id,
-        });
-
-        if (!existingNotif) {
-          const empName = task.assignedTo ? task.assignedTo.name : "Unknown Employee";
-          // Create notification for each admin
-          for (const admin of admins) {
-            const notification = new Notification({
-              recipient: admin._id,
-              message: `Task "${task.title}" assigned to ${empName} is overdue (due date: ${task.dueDate.toISOString().slice(0, 10)})`,
-              type: "TASK_OVERDUE",
-              relatedId: task._id,
-            });
-            await notification.save();
-          }
-          console.log(`Cron: Created overdue notification for task: "${task.title}"`);
-        }
-      }
-    } catch (err) {
-      console.error("Cron: Error checking overdue tasks:", err);
     }
   });
 };

@@ -66,7 +66,7 @@ function AdminAttendance() {
   const [date, setDate] = useState(new Date().toISOString().slice(0, 10));
   const [month, setMonth] = useState(String(new Date().getMonth() + 1).padStart(2, "0"));
   const [year, setYear] = useState(String(new Date().getFullYear()));
-  const [statusFilter, setStatusFilter] = useState<"all" | "PRESENT" | "ABSENT" | "WFH" | "HOLIDAY">("all");
+  const [statusFilter, setStatusFilter] = useState<"all" | "PRESENT" | "ABSENT" | "HOLIDAY">("all");
   const [searchName, setSearchName] = useState("");
   const [geofenceOnly, setGeofenceOnly] = useState(false);
   const [expandedRows, setExpandedRows] = useState<Record<string, boolean>>({});
@@ -167,7 +167,7 @@ function AdminAttendance() {
     const map = new Map<string, number>();
     calendarRecords.forEach((r) => {
       const d = r.date;
-      if (r.status === "PRESENT" || r.status === "WFH") {
+      if (r.status === "PRESENT") {
         map.set(d, (map.get(d) || 0) + 1);
       }
     });
@@ -236,7 +236,6 @@ function AdminAttendance() {
                     <SelectItem value="all">All Status</SelectItem>
                     <SelectItem value="PRESENT">Present</SelectItem>
                     <SelectItem value="ABSENT">Absent</SelectItem>
-                    <SelectItem value="WFH">Work From Home</SelectItem>
                     <SelectItem value="HOLIDAY">Holiday</SelectItem>
                   </SelectContent>
                 </Select>
@@ -455,7 +454,6 @@ function AdminAttendance() {
                     <TableHead>Designation</TableHead>
                     <TableHead className="text-center">Worked Days</TableHead>
                     <TableHead className="text-center">Present</TableHead>
-                    <TableHead className="text-center">WFH</TableHead>
                     <TableHead className="text-center">Leave</TableHead>
                     <TableHead className="text-center">Holiday</TableHead>
                     <TableHead className="text-center">Absent</TableHead>
@@ -465,7 +463,7 @@ function AdminAttendance() {
                 <TableBody>
                   {summaries.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={8} className="text-center text-muted-foreground py-10">
+                      <TableCell colSpan={7} className="text-center text-muted-foreground py-10">
                         No monthly summary found. Click Generate to calculate for this month.
                       </TableCell>
                     </TableRow>
@@ -482,7 +480,6 @@ function AdminAttendance() {
                         <TableCell className="text-center text-green-600">
                           {s.totalPresent}
                         </TableCell>
-                        <TableCell className="text-center text-blue-600">{s.totalWfh}</TableCell>
                         <TableCell className="text-center text-yellow-600">
                           {s.totalLeave}
                         </TableCell>

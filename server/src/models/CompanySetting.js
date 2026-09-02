@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 
 const companySettingSchema = new mongoose.Schema(
   {
-    companyName: { type: String, required: true, default: "Gemshine Infotech" },
+    companyName: { type: String, required: true, default: "Mahes Bankers" },
     latitude: { type: Number, required: true },
     longitude: { type: Number, required: true },
     allowedRadius: { type: Number, required: true, default: 100 }, // in meters

@@ -5,7 +5,6 @@ export type AttendanceStatus =
   | "present"
   | "absent"
   | "not_marked"
-  | "WFH"
   | "LEAVE"
   | "PRESENT"
   | "ABSENT";
@@ -55,15 +54,6 @@ export interface LeaveRequest {
   createdAt: string;
 }
 
-export interface WfhRequest {
-  id: string;
-  userId: string;
-  date: string;
-  reason: string;
-  status: LeaveStatus;
-  createdAt: string;
-}
-
 export interface ChatMessage {
   id: string;
   userId: string;
@@ -82,31 +72,6 @@ export interface Holiday {
   description?: string;
 }
 
-export interface Task {
-  id: string;
-  title: string;
-  description: string;
-  priority: "Low" | "Medium" | "High";
-  assignedTo: string;
-  assignedToName?: string;
-  assignedBy: string;
-  assignedByName?: string;
-  assignedDate: string;
-  dueDate: string;
-  status: "Pending" | "Completed";
-  completedDate?: string;
-}
-
-export interface NotificationItem {
-  id: string;
-  recipient: string;
-  message: string;
-  type: "TASK_ASSIGNED" | "TASK_OVERDUE" | "TASK_COMPLETED";
-  isRead: boolean;
-  relatedId?: string;
-  createdAt: string;
-}
-
 const today = () => new Date().toISOString().slice(0, 10);
 const uid = () => Math.random().toString(36).slice(2, 10);
 
@@ -114,7 +79,7 @@ export const seedUsers: User[] = [
   {
     id: "u-admin",
     name: "Aarav Sharma",
-    email: "admin@gemshine.dev",
+    email: "admin@mahesbankers.com",
     password: "admin123",
     role: "admin",
     department: "Operations",
@@ -122,7 +87,7 @@ export const seedUsers: User[] = [
     leaveBalance: 18,
     status: "active",
     shiftTiming: "09:00 - 18:00",
-    employeeId: "GS-0001",
+    employeeId: "MB-0001",
     designation: "Head of Operations",
     manager: "—",
     joinedDate: "2019-06-01",
@@ -137,7 +102,7 @@ export const seedUsers: User[] = [
   {
     id: "u-emp-1",
     name: "Priya Nair",
-    email: "employee@gemshine.dev",
+    email: "employee@mahesbankers.com",
     password: "employee123",
     role: "employee",
     department: "Engineering",
@@ -145,7 +110,7 @@ export const seedUsers: User[] = [
     leaveBalance: 14,
     status: "active",
     shiftTiming: "09:00 - 18:00",
-    employeeId: "GS-0102",
+    employeeId: "MB-0102",
     designation: "Senior Software Engineer",
     manager: "Aarav Sharma",
     joinedDate: "2021-09-15",
@@ -160,7 +125,7 @@ export const seedUsers: User[] = [
   {
     id: "u-emp-2",
     name: "Rahul Verma",
-    email: "rahul@gemshine.dev",
+    email: "rahul@mahesbankers.com",
     password: "rahul123",
     role: "employee",
     department: "Design",
@@ -168,7 +133,7 @@ export const seedUsers: User[] = [
     leaveBalance: 12,
     status: "active",
     shiftTiming: "10:00 - 19:00",
-    employeeId: "GS-0118",
+    employeeId: "MB-0118",
     designation: "Product Designer",
     manager: "Aarav Sharma",
     joinedDate: "2022-02-07",
@@ -183,7 +148,7 @@ export const seedUsers: User[] = [
   {
     id: "u-emp-3",
     name: "Sneha Iyer",
-    email: "sneha@gemshine.dev",
+    email: "sneha@mahesbankers.com",
     password: "sneha123",
     role: "employee",
     department: "QA",
@@ -191,7 +156,7 @@ export const seedUsers: User[] = [
     leaveBalance: 16,
     status: "active",
     shiftTiming: "09:00 - 18:00",
-    employeeId: "GS-0125",
+    employeeId: "MB-0125",
     designation: "QA Engineer",
     manager: "Aarav Sharma",
     joinedDate: "2022-08-19",
@@ -281,17 +246,6 @@ export const seedLeaves: LeaveRequest[] = [
     reason: "Medical appointment",
     status: "approved",
     createdAt: new Date(Date.now() - 86400000).toISOString(),
-  },
-];
-
-export const seedWfh: WfhRequest[] = [
-  {
-    id: uid(),
-    userId: "u-emp-1",
-    date: today(),
-    reason: "Internet installation at home",
-    status: "pending",
-    createdAt: new Date().toISOString(),
   },
 ];
 

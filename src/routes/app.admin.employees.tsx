@@ -57,10 +57,10 @@ function AdminEmployees() {
   // Get today's date for attendance check
   const todayDate = useMemo(() => new Date().toISOString().slice(0, 10), []);
 
-  // Get WFH employees for today
-  const wfhEmployeesToday = useMemo(() => {
+  // Get Present employees for today
+  const presentEmployeesToday = useMemo(() => {
     const todayAttendance = state.attendance.filter(
-      (a) => a.date === todayDate && a.status === "WFH",
+      (a) => a.date === todayDate && a.status === "PRESENT",
     );
     return new Set(todayAttendance.map((a) => a.userId));
   }, [state.attendance, todayDate]);
@@ -310,11 +310,13 @@ function AdminEmployees() {
                         <TableCell className="text-sm text-muted-foreground">{u.phone}</TableCell>
                         <TableCell>{getStatusBadge(u.status)}</TableCell>
                         <TableCell>
-                          {wfhEmployeesToday.has(u.id) ? (
-                            <Badge className="bg-blue-100 text-blue-800 border-blue-300">WFH</Badge>
+                          {presentEmployeesToday.has(u.id) ? (
+                            <Badge className="bg-green-100 text-green-800 border-green-300">
+                              Present
+                            </Badge>
                           ) : (
                             <Badge variant="outline" className="text-xs text-muted-foreground">
-                              Office
+                              Not Marked
                             </Badge>
                           )}
                         </TableCell>

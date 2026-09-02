@@ -2,7 +2,7 @@
  * Utility functions for attendance status badges and formatting
  */
 
-export type AttendanceStatus = "PRESENT" | "ABSENT" | "WFH" | "LEAVE" | "HOLIDAY";
+export type AttendanceStatus = "PRESENT" | "ABSENT" | "LEAVE" | "HOLIDAY";
 
 export interface StatusBadgeConfig {
   label: string;
@@ -29,13 +29,6 @@ export const getStatusBadgeConfig = (status: AttendanceStatus): StatusBadgeConfi
         bgColor: "bg-red-100",
         textColor: "text-red-800",
         borderColor: "border-red-300",
-      };
-    case "WFH":
-      return {
-        label: "Work From Home",
-        bgColor: "bg-blue-100",
-        textColor: "text-blue-800",
-        borderColor: "border-blue-300",
       };
     case "LEAVE":
       return {
@@ -71,10 +64,9 @@ export const getStatusBadgeClass = (status: AttendanceStatus): string => {
 
 /**
  * Check if status counts as present
- * WFH should be treated as present for statistics
  */
 export const isPresent = (status: AttendanceStatus): boolean => {
-  return status === "PRESENT" || status === "WFH";
+  return status === "PRESENT";
 };
 
 /**

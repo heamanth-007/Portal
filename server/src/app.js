@@ -5,18 +5,14 @@ const authRoutes = require("./routes/auth");
 const adminEmployees = require("./routes/admin/employees");
 const adminAttendance = require("./routes/admin/attendance");
 const adminLeave = require("./routes/admin/leave");
-const adminWfh = require("./routes/admin/wfh");
 const adminHolidays = require("./routes/admin/holidays");
 const adminDashboard = require("./routes/admin/dashboard");
 const adminCompanySettings = require("./routes/admin/companySettings");
 const attendanceRoutes = require("./routes/attendance");
 const leaveRoutes = require("./routes/leave");
-const wfhRoutes = require("./routes/wfh");
 const holidaysRoutes = require("./routes/holidays");
 const employeesRoutes = require("./routes/employees");
 const companySettingsRoutes = require("./routes/companySettings");
-const taskRoutes = require("./routes/tasks");
-const notificationRoutes = require("./routes/notifications");
 const auth = require("./middlewares/auth");
 const { isAdmin } = require("./middlewares/role");
 const logger = require("./middlewares/logger");
@@ -53,14 +49,10 @@ app.use("/api/admin/company-settings", auth, isAdmin, adminCompanySettings);
 // employee routes (require auth)
 app.use("/api/attendance", auth, attendanceRoutes);
 app.use("/api/leave", auth, leaveRoutes);
-app.use("/api/wfh", auth, wfhRoutes);
 app.use("/api/holidays", auth, holidaysRoutes);
 app.use("/api/employees", auth, employeesRoutes);
 app.use("/api/company-settings", auth, companySettingsRoutes);
-app.use("/api/admin/wfh", auth, isAdmin, adminWfh);
 app.use("/api/chat", auth, require("./routes/chat"));
-app.use("/api/tasks", auth, taskRoutes);
-app.use("/api/notifications", auth, notificationRoutes);
 
 // error handler
 app.use(errorHandler);

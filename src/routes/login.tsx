@@ -4,9 +4,10 @@ import { useStore } from "@/lib/store";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Building2, Download, Share } from "lucide-react";
+import { Download, Share } from "lucide-react";
 import { toast } from "sonner";
 import { usePWAInstall } from "@/hooks/use-pwa-install";
+import { CompanyLogo } from "@/components/company-logo";
 
 export const Route = createFileRoute("/login")({
   component: LoginPage,
@@ -49,52 +50,52 @@ function LoginPage() {
 
   return (
     <div className="min-h-screen grid lg:grid-cols-2 bg-background">
-      <div className="hidden lg:flex flex-col justify-between p-10 bg-primary text-primary-foreground relative overflow-hidden">
-        <div className="absolute -bottom-24 -right-24 h-96 w-96 rounded-full bg-primary-foreground/10 blur-3xl" />
-        <div className="absolute -top-24 -left-24 h-72 w-72 rounded-full bg-primary-foreground/10 blur-3xl" />
-        <div className="relative flex items-center gap-2.5">
-          <div className="h-9 w-9 rounded-md bg-primary-foreground/15 backdrop-blur flex items-center justify-center">
-            <Building2 className="h-5 w-5" />
+      <div className="hidden lg:flex flex-col justify-between p-10 bg-gradient-to-br from-orange-600 via-orange-500 to-amber-600 text-white relative overflow-hidden">
+        <div className="absolute -bottom-24 -right-24 h-96 w-96 rounded-full bg-white/10 blur-3xl" />
+        <div className="absolute -top-24 -left-24 h-72 w-72 rounded-full bg-white/10 blur-3xl" />
+        <div className="relative flex items-center gap-3">
+          <div className="h-11 w-11 rounded-xl bg-white p-1 shadow-md flex items-center justify-center">
+            <img src="/logo.svg" alt="Mahes Bankers" className="h-full w-full object-contain" />
           </div>
-          <span className="text-base font-semibold tracking-tight">Gemshine Infotech</span>
+          <div className="flex flex-col">
+            <span className="text-lg font-bold tracking-tight text-white">Mahes Bankers</span>
+            <span className="text-xs text-white/80 font-medium">Employee Portal</span>
+          </div>
         </div>
         <div className="relative space-y-6 max-w-md">
-          <h1 className="text-4xl font-semibold tracking-tight leading-tight">
+          <h1 className="text-4xl font-extrabold tracking-tight leading-tight">
             One portal for your team's day.
           </h1>
-          <p className="text-sm text-primary-foreground/80 leading-relaxed">
-            Attendance, leave, work-from-home requests and team chat — all in one crisp, modern
-            workspace built for IT teams.
+          <p className="text-sm text-white/90 leading-relaxed">
+            Attendance, leave management, and team chat — all in one modern, secure workspace built
+            for Mahes Bankers.
           </p>
           <div className="grid grid-cols-3 gap-3 pt-4">
-            {["Attendance", "Leave & WFH", "Team Chat"].map((label) => (
+            {["Attendance", "Leave Mgmt", "Team Chat"].map((label) => (
               <div
                 key={label}
-                className="rounded-lg border border-primary-foreground/15 bg-primary-foreground/5 px-3 py-2.5 text-xs font-medium"
+                className="rounded-lg border border-white/20 bg-white/10 backdrop-blur-sm px-3 py-2.5 text-xs font-semibold text-center"
               >
                 {label}
               </div>
             ))}
           </div>
         </div>
-        <div className="relative text-xs text-primary-foreground/60">
-          © {new Date().getFullYear()} Gemshine Infotech
+        <div className="relative text-xs text-white/75">
+          © {new Date().getFullYear()} Mahes Bankers. All rights reserved.
         </div>
       </div>
 
       <div className="flex items-center justify-center p-6 sm:p-10">
         <div className="w-full max-w-sm space-y-7">
-          <div className="lg:hidden flex items-center gap-2.5 mb-2">
-            <div className="h-9 w-9 rounded-md bg-primary flex items-center justify-center">
-              <Building2 className="h-5 w-5 text-primary-foreground" />
-            </div>
-            <span className="text-base font-semibold tracking-tight">Gemshine Infotech</span>
+          <div className="lg:hidden flex items-center mb-2">
+            <CompanyLogo size="md" />
           </div>
 
           <div className="space-y-1.5">
-            <h2 className="text-2xl font-semibold tracking-tight">Sign in</h2>
+            <h2 className="text-2xl font-bold tracking-tight">Sign in</h2>
             <p className="text-sm text-muted-foreground">
-              Use your work email to access the portal.
+              Use your work credentials to access Mahes Bankers portal.
             </p>
           </div>
 
@@ -106,7 +107,7 @@ function LoginPage() {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="you@gemshine.dev"
+                placeholder="you@mahesbankers.com"
                 autoComplete="email"
                 required
               />
@@ -122,23 +123,27 @@ function LoginPage() {
                 required
               />
             </div>
-            <Button type="submit" className="w-full" disabled={loading}>
+            <Button
+              type="submit"
+              className="w-full bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-600 hover:to-amber-700 text-white font-semibold shadow-md shadow-orange-500/20"
+              disabled={loading}
+            >
               {loading ? "Signing in…" : "Sign in"}
             </Button>
           </form>
 
           {isInstallable && (
-            <div className="rounded-lg border border-blue-100 bg-blue-50/50 p-4 space-y-3 dark:border-blue-900/30 dark:bg-blue-950/20 animate-in fade-in slide-in-from-bottom-2 duration-300">
+            <div className="rounded-lg border border-orange-100 bg-orange-50/50 p-4 space-y-3 dark:border-orange-900/30 dark:bg-orange-950/20 animate-in fade-in slide-in-from-bottom-2 duration-300">
               <div className="flex items-start gap-3">
-                <div className="h-8 w-8 rounded-md bg-blue-600 flex items-center justify-center text-white shrink-0 shadow-sm shadow-blue-500/20">
+                <div className="h-8 w-8 rounded-md bg-orange-500 flex items-center justify-center text-white shrink-0 shadow-sm shadow-orange-500/20">
                   <Download className="h-4 w-4" />
                 </div>
                 <div className="space-y-1 flex-1">
-                  <h4 className="text-xs font-semibold text-blue-900 dark:text-blue-200">
+                  <h4 className="text-xs font-semibold text-orange-900 dark:text-orange-200">
                     Install Portal App
                   </h4>
-                  <p className="text-[11px] text-blue-700/80 dark:text-blue-300/80 leading-relaxed">
-                    Install Gemshine Portal for a faster, native app experience on your desktop or
+                  <p className="text-[11px] text-orange-700/80 dark:text-orange-300/80 leading-relaxed">
+                    Install Mahes Bankers Portal for a faster, native app experience on your desktop or
                     mobile device.
                   </p>
                 </div>
