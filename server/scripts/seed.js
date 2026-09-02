@@ -2,7 +2,7 @@ const path = require("path");
 const mongoose = require("mongoose");
 const dotenv = require("dotenv");
 const bcrypt = require("bcryptjs");
-const Employee = require("../src/models/Employee");
+const Employee = require("../models/Employee");
 
 // Load .env from server directory first, fallback to cwd
 dotenv.config({ path: path.join(__dirname, "../.env") });
