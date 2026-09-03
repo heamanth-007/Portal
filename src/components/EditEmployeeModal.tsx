@@ -78,59 +78,62 @@ export function EditEmployeeModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>Edit employee</DialogTitle>
-          <DialogDescription className="sr-only">
-            Form to edit an existing employee's details.
+      <DialogContent className="max-w-xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader className="border-b pb-3">
+          <DialogTitle className="text-xl font-bold">Edit Employee Details</DialogTitle>
+          <DialogDescription className="text-xs text-muted-foreground">
+            Update personal, contact, and employment information for {employee?.name || "the employee"}.
           </DialogDescription>
         </DialogHeader>
-        <form onSubmit={onEdit} className="space-y-3">
-          <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-1.5 col-span-2">
-              <Label>Employee ID (Read Only)</Label>
-              <Input value={employee?.employeeId || ""} disabled />
+        <form onSubmit={onEdit} className="space-y-4 pt-2">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="space-y-1.5 sm:col-span-2">
+              <Label className="font-semibold text-xs">Employee ID (Read Only)</Label>
+              <Input value={employee?.employeeId || ""} disabled className="bg-muted font-mono" />
             </div>
             <div className="space-y-1.5">
-              <Label>Full name *</Label>
+              <Label className="font-semibold text-xs">Full Name *</Label>
               <Input
                 value={form.name}
                 onChange={(e) => setForm({ ...form, name: e.target.value })}
+                required
               />
             </div>
             <div className="space-y-1.5">
-              <Label>Email *</Label>
+              <Label className="font-semibold text-xs">Email Address *</Label>
               <Input
                 type="email"
                 value={form.email}
                 onChange={(e) => setForm({ ...form, email: e.target.value })}
+                required
               />
             </div>
             <div className="space-y-1.5">
-              <Label>Phone</Label>
+              <Label className="font-semibold text-xs">Phone Number</Label>
               <Input
                 value={form.phone}
                 onChange={(e) => setForm({ ...form, phone: e.target.value })}
               />
             </div>
             <div className="space-y-1.5">
-              <Label>Department</Label>
+              <Label className="font-semibold text-xs">Department *</Label>
               <Input
                 value={form.department}
                 onChange={(e) => setForm({ ...form, department: e.target.value })}
+                required
               />
             </div>
             <div className="space-y-1.5">
-              <Label>Designation</Label>
+              <Label className="font-semibold text-xs">Designation</Label>
               <Input
                 value={form.designation}
                 onChange={(e) => setForm({ ...form, designation: e.target.value })}
               />
             </div>
             <div className="space-y-1.5">
-              <Label>Role</Label>
+              <Label className="font-semibold text-xs">Role</Label>
               <select
-                className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                className="flex h-10 w-full items-center rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
                 value={form.role}
                 onChange={(e) => setForm({ ...form, role: e.target.value })}
               >
@@ -139,9 +142,9 @@ export function EditEmployeeModal({
               </select>
             </div>
             <div className="space-y-1.5">
-              <Label>Status</Label>
+              <Label className="font-semibold text-xs">Status</Label>
               <select
-                className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                className="flex h-10 w-full items-center rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
                 value={form.status}
                 onChange={(e) => setForm({ ...form, status: e.target.value })}
               >
@@ -150,7 +153,7 @@ export function EditEmployeeModal({
               </select>
             </div>
             <div className="space-y-1.5">
-              <Label>Date of Birth</Label>
+              <Label className="font-semibold text-xs">Date of Birth</Label>
               <Input
                 type="date"
                 value={form.dob}
@@ -158,7 +161,7 @@ export function EditEmployeeModal({
               />
             </div>
             <div className="space-y-1.5">
-              <Label>Joining Date</Label>
+              <Label className="font-semibold text-xs">Joining Date</Label>
               <Input
                 type="date"
                 value={form.joiningDate}
@@ -166,11 +169,13 @@ export function EditEmployeeModal({
               />
             </div>
           </div>
-          <DialogFooter>
+          <DialogFooter className="pt-3 border-t mt-4 gap-2">
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               Cancel
             </Button>
-            <Button type="submit">Save changes</Button>
+            <Button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm">
+              Save Changes
+            </Button>
           </DialogFooter>
         </form>
       </DialogContent>

@@ -80,71 +80,82 @@ export function AddEmployeeModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>New employee</DialogTitle>
-          <DialogDescription className="sr-only">
-            Form to add a new employee to the system.
+      <DialogContent className="max-w-xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader className="border-b pb-3">
+          <DialogTitle className="text-xl font-bold">Add New Employee</DialogTitle>
+          <DialogDescription className="text-xs text-muted-foreground">
+            Enter the employee details below to create a new team member account.
           </DialogDescription>
         </DialogHeader>
-        <form onSubmit={onAdd} className="space-y-3">
-          <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-1.5 col-span-2">
-              <Label>Employee ID *</Label>
+        <form onSubmit={onAdd} className="space-y-4 pt-2">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="space-y-1.5 sm:col-span-2">
+              <Label className="font-semibold text-xs">Employee ID *</Label>
               <Input
                 placeholder="e.g. EMP001"
                 value={form.employeeId}
                 onChange={(e) => setForm({ ...form, employeeId: e.target.value })}
+                required
               />
             </div>
             <div className="space-y-1.5">
-              <Label>Full name *</Label>
+              <Label className="font-semibold text-xs">Full Name *</Label>
               <Input
+                placeholder="e.g. Alex Johnson"
                 value={form.name}
                 onChange={(e) => setForm({ ...form, name: e.target.value })}
+                required
               />
             </div>
             <div className="space-y-1.5">
-              <Label>Email *</Label>
+              <Label className="font-semibold text-xs">Email Address *</Label>
               <Input
                 type="email"
+                placeholder="e.g. alex@company.com"
                 value={form.email}
                 onChange={(e) => setForm({ ...form, email: e.target.value })}
+                required
               />
             </div>
             <div className="space-y-1.5">
-              <Label>Initial password *</Label>
+              <Label className="font-semibold text-xs">Initial Password *</Label>
               <Input
-                type="text"
+                type="password"
+                placeholder="Min 6 characters"
                 value={form.password}
                 onChange={(e) => setForm({ ...form, password: e.target.value })}
+                required
               />
             </div>
             <div className="space-y-1.5">
-              <Label>Phone</Label>
+              <Label className="font-semibold text-xs">Phone Number</Label>
               <Input
+                placeholder="e.g. +91 9876543210"
                 value={form.phone}
                 onChange={(e) => setForm({ ...form, phone: e.target.value })}
               />
             </div>
             <div className="space-y-1.5">
-              <Label>Department</Label>
+              <Label className="font-semibold text-xs">Department *</Label>
               <Input
+                placeholder="e.g. Engineering, Sales"
                 value={form.department}
                 onChange={(e) => setForm({ ...form, department: e.target.value })}
+                required
               />
             </div>
             <div className="space-y-1.5">
-              <Label>Designation</Label>
+              <Label className="font-semibold text-xs">Designation</Label>
               <Input
+                placeholder="e.g. Senior Developer"
                 value={form.designation}
                 onChange={(e) => setForm({ ...form, designation: e.target.value })}
               />
             </div>
             <div className="space-y-1.5">
-              <Label>Role</Label>
+              <Label className="font-semibold text-xs">Role</Label>
               <select
-                className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                className="flex h-10 w-full items-center rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
                 value={form.role}
                 onChange={(e) => setForm({ ...form, role: e.target.value })}
               >
@@ -153,9 +164,9 @@ export function AddEmployeeModal({
               </select>
             </div>
             <div className="space-y-1.5">
-              <Label>Status</Label>
+              <Label className="font-semibold text-xs">Status</Label>
               <select
-                className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                className="flex h-10 w-full items-center rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
                 value={form.status}
                 onChange={(e) => setForm({ ...form, status: e.target.value })}
               >
@@ -164,7 +175,7 @@ export function AddEmployeeModal({
               </select>
             </div>
             <div className="space-y-1.5">
-              <Label>Date of Birth</Label>
+              <Label className="font-semibold text-xs">Date of Birth</Label>
               <Input
                 type="date"
                 value={form.dob}
@@ -172,7 +183,7 @@ export function AddEmployeeModal({
               />
             </div>
             <div className="space-y-1.5">
-              <Label>Joining Date</Label>
+              <Label className="font-semibold text-xs">Joining Date</Label>
               <Input
                 type="date"
                 value={form.joiningDate}
@@ -180,11 +191,13 @@ export function AddEmployeeModal({
               />
             </div>
           </div>
-          <DialogFooter>
+          <DialogFooter className="pt-3 border-t mt-4 gap-2">
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               Cancel
             </Button>
-            <Button type="submit">Create employee</Button>
+            <Button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm">
+              Create Employee
+            </Button>
           </DialogFooter>
         </form>
       </DialogContent>

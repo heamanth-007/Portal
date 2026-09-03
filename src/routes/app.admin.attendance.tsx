@@ -463,7 +463,7 @@ function AdminAttendance() {
                 <TableBody>
                   {summaries.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={7} className="text-center text-muted-foreground py-10">
+                      <TableCell colSpan={8} className="text-center text-muted-foreground py-10">
                         No monthly summary found. Click Generate to calculate for this month.
                       </TableCell>
                     </TableRow>

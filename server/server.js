@@ -19,7 +19,7 @@ async function start() {
 
     const io = require("socket.io")(server, {
       cors: {
-        origin: "*",
+        origin: (origin, callback) => callback(null, true),
         methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
         credentials: true,
       },

@@ -1,5 +1,5 @@
 import { createFileRoute, Navigate } from "@tanstack/react-router";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { useStore } from "@/lib/store";
 import { PageHeader } from "@/components/app-shell";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -14,7 +14,7 @@ import {
   fetchMonthlySummaries,
   fetchCompanySettings,
 } from "@/lib/attendanceService";
-import { MapPin, Navigation, Compass, Shield, Laptop, Network, Globe } from "lucide-react";
+import { MapPin, Navigation, Compass, Shield, Laptop, Network, Globe, MapPinOff, CheckCircle2 } from "lucide-react";
 import { format } from "date-fns";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -50,50 +50,68 @@ function fmt(iso?: string) {
 }
 
 function getDistanceFromLatLonInM(lat1: number, lon1: number, lat2: number, lon2: number) {
-  const R = 6371e3; // Radius of the earth in meters
-  const dLat = (lat2 - lat1) * (Math.PI / 180);
-  const dLon = (lon2 - lon1) * (Math.PI / 180);
+  const R = 6371e3; // metres
+  const φ1 = (lat1 * Math.PI) / 180;
+  const φ2 = (lat2 * Math.PI) / 180;
+  const Δφ = ((lat2 - lat1) * Math.PI) / 180;
+  const Δλ = ((lon2 - lon1) * Math.PI) / 180;
+
   const a =
-    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-    Math.cos(lat1 * (Math.PI / 180)) *
-      Math.cos(lat2 * (Math.PI / 180)) *
-      Math.sin(dLon / 2) *
-      Math.sin(dLon / 2);
+    Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
+    Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
   return Math.round(R * c);
 }
 
 function getClientMetadata() {
-  const userAgent = navigator.userAgent;
-  let browser = "Unknown Browser";
-  let os = "Unknown OS";
+  const ua = navigator.userAgent;
+  let browser = "Unknown";
+  if (ua.includes("Firefox")) browser = "Firefox";
+  else if (ua.includes("SamsungBrowser")) browser = "Samsung Browser";
+  else if (ua.includes("Opera") || ua.includes("OPR")) browser = "Opera";
+  else if (ua.includes("Edge") || ua.includes("Edg")) browser = "Edge";
+  else if (ua.includes("Chrome")) browser = "Chrome";
+  else if (ua.includes("Safari")) browser = "Safari";
 
-  if (userAgent.indexOf("Firefox") > -1) browser = "Mozilla Firefox";
-  else if (userAgent.indexOf("SamsungBrowser") > -1) browser = "Samsung Internet";
-  else if (userAgent.indexOf("Opera") > -1 || userAgent.indexOf("OPR") > -1) browser = "Opera";
-  else if (userAgent.indexOf("Trident") > -1) browser = "Microsoft Internet Explorer";
-  else if (userAgent.indexOf("Edge") > -1) browser = "Microsoft Edge";
-  else if (userAgent.indexOf("Chrome") > -1) browser = "Google Chrome";
-  else if (userAgent.indexOf("Safari") > -1) browser = "Apple Safari";
-
-  if (userAgent.indexOf("Windows") > -1) os = "Windows";
-  else if (userAgent.indexOf("Macintosh") > -1) os = "macOS";
-  else if (userAgent.indexOf("Android") > -1) os = "Android";
-  else if (userAgent.indexOf("iPhone") > -1 || userAgent.indexOf("iPad") > -1) os = "iOS";
-  else if (userAgent.indexOf("Linux") > -1) os = "Linux";
+  let os = "Unknown";
+  if (ua.includes("Win")) os = "Windows";
+  else if (ua.includes("Mac")) os = "MacOS";
+  else if (ua.includes("Linux")) os = "Linux";
+  else if (ua.includes("Android")) os = "Android";
+  else if (ua.includes("like Mac")) os = "iOS";
 
   return {
     deviceInfo: `${os} Device`,
-    browserDetails: browser,
+    browserDetails: `${browser} Browser`,
   };
 }
 
 function AttendancePage() {
   const { currentUser } = useStore();
+  const [tab, setTab] = useState("list");
 
-  if (!currentUser) return <Navigate to="/login" />;
-  if (currentUser.role === "admin") return <Navigate to="/app/admin/attendance" />;
+  // Summary filters
+  const [summaryMonth, setSummaryMonth] = useState(
+    String(new Date().getMonth() + 1).padStart(2, "0"),
+  );
+  const [summaryYear, setSummaryYear] = useState(String(new Date().getFullYear()));
+  const [summaries, setSummaries] = useState<any[]>([]);
 
+  // List View states
+  const [viewMode, setViewMode] = useState<"all" | "month">("month");
+  const [month, setMonth] = useState(String(new Date().getMonth() + 1).padStart(2, "0"));
+  const [year, setYear] = useState(String(new Date().getFullYear()));
+  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [records, setRecords] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [page, setPage] = useState(1);
+  const itemsPerPage = 10;
+
+  // Calendar View states
+  const [calendarRecords, setCalendarRecords] = useState<any[]>([]);
+
+  // Today attendance state
   const [todayRecord, setTodayRecord] = useState<any>(null);
 
   // Geofencing states
@@ -103,99 +121,78 @@ function AttendancePage() {
     longitude: number;
     accuracy: number;
   } | null>(null);
-  const [gpsStatus, setGpsStatus] = useState<"idle" | "acquiring" | "success" | "error">("idle");
-  const [gpsError, setGpsError] = useState<string>("");
   const [distanceFromOffice, setDistanceFromOffice] = useState<number | null>(null);
   const [isInsideRadius, setIsInsideRadius] = useState<boolean | null>(null);
+  const [gpsStatus, setGpsStatus] = useState<"idle" | "acquiring" | "success" | "error">("idle");
+  const [gpsError, setGpsError] = useState<string | null>(null);
 
-  // Tabs & Views
-  const [tab, setTab] = useState("list");
-
-  // Filters
-  const [viewMode, setViewMode] = useState<"month" | "all">("all");
-  const [month, setMonth] = useState(String(new Date().getMonth() + 1).padStart(2, "0"));
-  const [year, setYear] = useState(String(new Date().getFullYear()));
-  const [statusFilter, setStatusFilter] = useState<"all" | "PRESENT" | "ABSENT" | "LEAVE" | "HOLIDAY">(
-    "all",
-  );
-
-  const [records, setRecords] = useState<any[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [page, setPage] = useState(1);
-  const itemsPerPage = 20;
-
-  // Summaries
-  const [summaries, setSummaries] = useState<any[]>([]);
-  const [summaryMonth, setSummaryMonth] = useState(
-    String(new Date().getMonth() + 1).padStart(2, "0"),
-  );
-  const [summaryYear, setSummaryYear] = useState(String(new Date().getFullYear()));
-
-  // Calendar logic
-  const [calendarRecords, setCalendarRecords] = useState<any[]>([]);
-
-  const fetchToday = async () => {
+  const fetchToday = useCallback(async () => {
     try {
-      const res = await fetchTodayAttendance();
-      if (res.data?.attendance) {
-        setTodayRecord(res.data.attendance);
+      const data = await fetchTodayAttendance();
+      if (data.success) {
+        setTodayRecord(data.data);
       }
     } catch (e) {
-      console.error(e);
+      console.error("Failed to fetch today attendance", e);
     }
-  };
+  }, []);
 
-  const fetchSettings = async () => {
+  const fetchSettings = useCallback(async () => {
     try {
-      const res = await fetchCompanySettings();
-      if (res.data?.settings) {
-        setCompanySettings(res.data.settings);
+      const data = await fetchCompanySettings();
+      if (data.success) {
+        setCompanySettings(data.data);
       }
     } catch (e) {
       console.error("Failed to fetch geofencing settings", e);
     }
-  };
+  }, []);
 
-  const acquireLocation = () => {
+  const acquireLocation = useCallback(() => {
     if (!navigator.geolocation) {
       setGpsStatus("error");
-      setGpsError("Geolocation is not supported by this browser.");
+      setGpsError("Geolocation is not supported by your browser.");
+      setIsInsideRadius(false);
       return;
     }
 
     setGpsStatus("acquiring");
+    setGpsError(null);
+
     navigator.geolocation.getCurrentPosition(
-      (position) => {
+      (pos) => {
         const coords = {
-          latitude: position.coords.latitude,
-          longitude: position.coords.longitude,
-          accuracy: Math.round(position.coords.accuracy),
+          latitude: pos.coords.latitude,
+          longitude: pos.coords.longitude,
+          accuracy: Math.round(pos.coords.accuracy),
         };
         setEmployeeCoords(coords);
         setGpsStatus("success");
-        setGpsError("");
       },
-      (error) => {
+      (err) => {
         setGpsStatus("error");
-        let msg = "Failed to acquire location.";
-        if (error.code === error.PERMISSION_DENIED) {
-          msg = "Location permission denied. Please enable GPS permissions in browser settings.";
-        } else if (error.code === error.POSITION_UNAVAILABLE) {
-          msg = "GPS coordinates unavailable.";
-        } else if (error.code === error.TIMEOUT) {
-          msg = "GPS request timed out.";
+        setIsInsideRadius(false);
+        if (err.code === err.PERMISSION_DENIED) {
+          setGpsError("Location access denied. Please enable location permissions.");
+        } else if (err.code === err.POSITION_UNAVAILABLE) {
+          setGpsError("Location information unavailable.");
+        } else {
+          setGpsError("Location timeout. Please try refreshing GPS.");
         }
-        setGpsError(msg);
       },
-      { enableHighAccuracy: true, timeout: 15000 },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 0,
+      },
     );
-  };
+  }, []);
 
   useEffect(() => {
     fetchToday();
     fetchSettings();
     acquireLocation();
-  }, []);
+  }, [fetchToday, fetchSettings, acquireLocation]);
 
   useEffect(() => {
     if (employeeCoords && companySettings) {
@@ -206,15 +203,22 @@ function AttendancePage() {
         companySettings.longitude,
       );
       setDistanceFromOffice(dist);
-      setIsInsideRadius(dist <= companySettings.allowedRadius);
+      setIsInsideRadius(dist <= (companySettings.allowedRadius || 100));
     }
   }, [employeeCoords, companySettings]);
 
+  const hasCheckedIn = !!todayRecord?.checkInTime;
+  const hasCheckedOut = !!todayRecord?.checkOutTime;
+
+  // Strict check: only available when verified inside office location
+  const isCheckInAvailable =
+    !hasCheckedIn &&
+    (!companySettings?.enforceGeofencing || isInsideRadius === true) &&
+    gpsStatus !== "acquiring" &&
+    gpsStatus !== "error";
+
   const handleCheckIn = async () => {
-    if (companySettings && companySettings.enforceGeofencing && isInsideRadius === false) {
-      toast.error("You are outside the company location. Check-In not allowed.");
-      return;
-    }
+    if (!isCheckInAvailable) return;
 
     try {
       const metadata = getClientMetadata();
@@ -253,11 +257,8 @@ function AttendancePage() {
     }
   };
 
-  const hasCheckedIn = !!todayRecord?.checkInTime;
-  const hasCheckedOut = !!todayRecord?.checkOutTime;
-
   // List View Loading
-  const loadRecords = async () => {
+  const loadRecords = useCallback(async () => {
     setLoading(true);
     try {
       if (viewMode === "month") {
@@ -267,35 +268,37 @@ function AttendancePage() {
         const data = await fetchAllAttendance();
         setRecords(data.data?.records || data.records || []);
       }
-      setPage(1);
-    } catch (err: any) {
-      toast.error(err.message || "Failed to load records");
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to load records");
     } finally {
       setLoading(false);
     }
-  };
+  }, [viewMode, month, year]);
 
   useEffect(() => {
     if (tab === "list") {
       loadRecords();
     }
-  }, [viewMode, month, year, tab]);
+  }, [tab, viewMode, month, year, loadRecords]);
 
   // Summaries Loading
-  const loadSummaries = async () => {
+  const loadSummaries = useCallback(async () => {
     try {
       const data = await fetchMonthlySummaries(summaryMonth, summaryYear);
-      setSummaries(data.data?.summaries || data.summaries || []);
-    } catch (err: any) {
-      toast.error(err.message || "Failed to load summaries");
+      if (data.success) {
+        setSummaries(data.data || []);
+      }
+    } catch (err) {
+      console.error(err);
     }
-  };
+  }, [summaryMonth, summaryYear]);
 
   useEffect(() => {
     if (tab === "summary") {
       loadSummaries();
     }
-  }, [tab, summaryMonth, summaryYear]);
+  }, [tab, summaryMonth, summaryYear, loadSummaries]);
 
   // Calendar Loading
   const loadCalendarMonth = async (m: string, y: string) => {
@@ -316,7 +319,7 @@ function AttendancePage() {
 
   const calendarEvents = useMemo(() => {
     return calendarRecords.map((r) => {
-      let color = "#9ca3af"; // default gray
+      let color = "#9ca3af";
       if (r.status === "PRESENT") color = "#22c55e";
       if (r.status === "LEAVE") color = "#eab308";
 
@@ -337,6 +340,8 @@ function AttendancePage() {
 
   const totalPages = Math.ceil(filteredByStatus.length / itemsPerPage);
   const paginatedRecords = filteredByStatus.slice((page - 1) * itemsPerPage, page * itemsPerPage);
+
+  if (!currentUser) return <Navigate to="/login" />;
 
   return (
     <div className="p-6 sm:p-8 max-w-6xl mx-auto space-y-6">
@@ -382,8 +387,16 @@ function AttendancePage() {
             <div className="flex flex-col sm:flex-row gap-4 items-center justify-between mt-6 pt-6 border-t border-indigo-100/50">
               <div className="text-xs text-muted-foreground leading-relaxed">
                 {companySettings?.enforceGeofencing && isInsideRadius === false ? (
-                  <span className="text-red-600 font-medium">
-                    ⚠️ Check-in blocked: You are outside the office geofence.
+                  <span className="text-rose-600 font-semibold flex items-center gap-1.5">
+                    <MapPinOff className="h-4 w-4 shrink-0 text-rose-600" /> Outside office boundary ({distanceFromOffice !== null ? `${distanceFromOffice}m away` : ""}) — Check-in disabled.
+                  </span>
+                ) : companySettings?.enforceGeofencing && isInsideRadius === true ? (
+                  <span className="text-emerald-600 font-semibold flex items-center gap-1.5">
+                    <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-600" /> Inside office radius ({distanceFromOffice}m). Ready to check in.
+                  </span>
+                ) : gpsStatus === "acquiring" ? (
+                  <span className="text-amber-600 font-medium flex items-center gap-1.5">
+                    <Compass className="h-4 w-4 animate-spin shrink-0 text-amber-600" /> Verifying office location...
                   </span>
                 ) : (
                   <span>Ensure your location services are active before marking attendance.</span>
@@ -392,15 +405,15 @@ function AttendancePage() {
               <div className="flex gap-4 w-full sm:w-auto shrink-0">
                 <Button
                   onClick={handleCheckIn}
-                  disabled={
-                    hasCheckedIn ||
-                    (companySettings?.enforceGeofencing && isInsideRadius === false) ||
-                    gpsStatus === "acquiring"
-                  }
-                  className="flex-grow sm:flex-none w-32 bg-blue-600 hover:bg-blue-700 text-white font-semibold shadow-sm"
+                  disabled={!isCheckInAvailable}
+                  className={`flex-grow sm:flex-none w-32 font-semibold shadow-sm ${
+                    isCheckInAvailable
+                      ? "bg-blue-600 hover:bg-blue-700 text-white"
+                      : "bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed hover:bg-slate-100"
+                  }`}
                   size="lg"
                 >
-                  Check In
+                  {gpsStatus === "acquiring" ? "Locating..." : "Check In"}
                 </Button>
                 <Button
                   variant="outline"
@@ -753,7 +766,7 @@ function AttendancePage() {
                 <TableBody>
                   {summaries.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={5} className="text-center text-muted-foreground py-10">
+                      <TableCell colSpan={6} className="text-center text-muted-foreground py-10">
                         No monthly summary generated yet for this period.
                       </TableCell>
                     </TableRow>
@@ -767,7 +780,7 @@ function AttendancePage() {
                         <TableCell className="text-center text-yellow-600">
                           {s.totalLeave}
                         </TableCell>
-                        <TableCell className="text-center text-purple-600">
+                        <TableCell className="text-purple-600">
                           {s.totalHoliday || 0}
                         </TableCell>
                         <TableCell className="text-center text-red-600">{s.totalAbsent}</TableCell>

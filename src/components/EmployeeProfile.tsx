@@ -166,89 +166,154 @@ export default function EmployeeProfile({
     }
   };
 
+  const isAdmin = currentUser?.role === "admin";
+  const canEdit = isOwnProfile || isAdmin;
+
   return (
-    <div className="p-6 sm:p-8 max-w-4xl">
-      <Button variant="outline" size="sm" onClick={onBack} className="mb-6">
+    <div className="p-6 sm:p-8 max-w-5xl mx-auto space-y-6">
+      <Button variant="outline" size="sm" onClick={onBack} className="gap-2 shadow-sm">
         <ArrowLeft className="h-4 w-4" /> Back to Employees
       </Button>
 
-      <Card className="mb-6">
-        <CardContent className="grid gap-6 sm:grid-cols-[auto_1fr] items-center">
-          <div className="flex items-center justify-center">
-            <Avatar className="h-20 w-20">
-              <AvatarFallback className="bg-primary-soft text-accent-foreground text-2xl font-semibold">
+      {/* Hero Card */}
+      <Card className="shadow-sm border-border overflow-hidden">
+        <CardContent className="p-6">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6">
+            <Avatar className="h-24 w-24 ring-4 ring-muted shadow-sm">
+              <AvatarFallback className="bg-blue-100 text-blue-700 text-2xl font-bold">
                 {getInitials(employee.name)}
               </AvatarFallback>
             </Avatar>
-          </div>
-          <div className="space-y-2">
-            <div className="flex flex-wrap items-center gap-3">
-              <h1 className="text-3xl font-semibold">{employee.name || "Employee"}</h1>
-              {getStatusBadge(employee.status)}
-            </div>
-            <div className="flex flex-wrap items-center gap-2">
-              <p className="text-sm text-muted-foreground">{employee.designation || "Employee"}</p>
-              {employee.department && (
-                <Badge className="bg-slate-100 text-slate-800 uppercase">
-                  {employee.department}
-                </Badge>
-              )}
-            </div>
-            <div className="grid gap-2 sm:grid-cols-2">
-              <div className="text-sm text-muted-foreground">Employee ID</div>
-              <div className="text-sm font-medium">
-                {employee.employeeId || employee._id || "—"}
+            <div className="flex-1 space-y-2">
+              <div className="flex flex-wrap items-center gap-3">
+                <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
+                  {employee.name || "Employee"}
+                </h1>
+                {getStatusBadge(employee.status)}
               </div>
-              <div className="text-sm text-muted-foreground">Role</div>
-              <div className="text-sm font-medium">{employee.role || "EMPLOYEE"}</div>
+              <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
+                <span className="font-medium text-foreground">{employee.designation || "Employee"}</span>
+                {employee.department && (
+                  <>
+                    <span>•</span>
+                    <Badge variant="outline" className="bg-slate-50 text-slate-700 border-slate-200 uppercase text-xs font-semibold">
+                      {employee.department}
+                    </Badge>
+                  </>
+                )}
+              </div>
+
+              {/* Quick Info Grid */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-3 border-t border-border mt-3">
+                <div>
+                  <div className="text-xs font-medium text-muted-foreground">Employee ID</div>
+                  <div className="text-sm font-semibold font-mono text-foreground mt-0.5">
+                    {employee.employeeId || employee._id || "—"}
+                  </div>
+                </div>
+                <div>
+                  <div className="text-xs font-medium text-muted-foreground">System Role</div>
+                  <div className="text-sm font-semibold uppercase text-foreground mt-0.5">
+                    {employee.role || "EMPLOYEE"}
+                  </div>
+                </div>
+                <div>
+                  <div className="text-xs font-medium text-muted-foreground">Phone Number</div>
+                  <div className="text-sm font-semibold text-foreground mt-0.5">
+                    {employee.phone || "—"}
+                  </div>
+                </div>
+                <div>
+                  <div className="text-xs font-medium text-muted-foreground">Email Address</div>
+                  <div className="text-sm font-semibold text-foreground truncate mt-0.5">
+                    {employee.email || "—"}
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </CardContent>
       </Card>
 
-      <div className="grid gap-6 lg:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle>Contact</CardTitle>
+      <div className="grid gap-6 md:grid-cols-2">
+        {/* Contact Information */}
+        <Card className="shadow-sm border-border">
+          <CardHeader className="bg-muted/30 pb-3">
+            <CardTitle className="text-base flex items-center gap-2">
+              <Mail className="h-4 w-4 text-blue-600" /> Contact Information
+            </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex items-center gap-2">
-              <Mail className="h-4 w-4 text-muted-foreground" />
-              <span className="text-sm font-medium">{employee.email || "—"}</span>
+          <CardContent className="p-6 space-y-4">
+            <div className="space-y-1">
+              <span className="text-xs font-medium text-muted-foreground">Work Email</span>
+              <div className="flex items-center gap-2 text-sm font-medium text-foreground">
+                <Mail className="h-4 w-4 text-muted-foreground shrink-0" />
+                <span className="truncate">{employee.email || "—"}</span>
+              </div>
             </div>
-            <div className="flex items-center gap-2">
-              <Phone className="h-4 w-4 text-muted-foreground" />
-              <span className="text-sm font-medium">{employee.phone || "—"}</span>
+            <div className="space-y-1">
+              <span className="text-xs font-medium text-muted-foreground">Contact Phone</span>
+              <div className="flex items-center gap-2 text-sm font-medium text-foreground">
+                <Phone className="h-4 w-4 text-muted-foreground shrink-0" />
+                <span>{employee.phone || "—"}</span>
+              </div>
+            </div>
+            <div className="space-y-1">
+              <span className="text-xs font-medium text-muted-foreground">Residential Address</span>
+              <div className="text-sm font-medium text-foreground">
+                {employee.address || "—"}
+              </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Company Details</CardTitle>
+        {/* Company Details */}
+        <Card className="shadow-sm border-border">
+          <CardHeader className="bg-muted/30 pb-3">
+            <CardTitle className="text-base flex items-center gap-2">
+              <Building2 className="h-4 w-4 text-blue-600" /> Company & Employment
+            </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex items-center gap-2">
-              <Briefcase className="h-4 w-4 text-muted-foreground" />
-              <span className="text-sm font-medium">{employee.designation || "—"}</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Building2 className="h-4 w-4 text-muted-foreground" />
-              <span className="text-sm font-medium">{employee.department || "—"}</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Calendar className="h-4 w-4 text-muted-foreground" />
-              <span className="text-sm font-medium">
-                {formatDate(employee.joiningDate || employee.joinedDate)}
-              </span>
+          <CardContent className="p-6 space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-1">
+                <span className="text-xs font-medium text-muted-foreground">Designation</span>
+                <div className="flex items-center gap-2 text-sm font-medium text-foreground">
+                  <Briefcase className="h-4 w-4 text-muted-foreground shrink-0" />
+                  <span>{employee.designation || "—"}</span>
+                </div>
+              </div>
+              <div className="space-y-1">
+                <span className="text-xs font-medium text-muted-foreground">Department</span>
+                <div className="flex items-center gap-2 text-sm font-medium text-foreground">
+                  <Building2 className="h-4 w-4 text-muted-foreground shrink-0" />
+                  <span>{employee.department || "—"}</span>
+                </div>
+              </div>
+              <div className="space-y-1">
+                <span className="text-xs font-medium text-muted-foreground">Joining Date</span>
+                <div className="flex items-center gap-2 text-sm font-medium text-foreground">
+                  <Calendar className="h-4 w-4 text-muted-foreground shrink-0" />
+                  <span>{formatDate(employee.joiningDate || employee.joinedDate)}</span>
+                </div>
+              </div>
+              <div className="space-y-1">
+                <span className="text-xs font-medium text-muted-foreground">Reporting Manager</span>
+                <div className="text-sm font-medium text-foreground">
+                  {employee.manager || "—"}
+                </div>
+              </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="lg:col-span-2">
-          <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle>Personal Information</CardTitle>
-            {isOwnProfile && !isEditing && (
+        {/* Personal Information */}
+        <Card className="shadow-sm border-border md:col-span-2">
+          <CardHeader className="bg-muted/30 pb-3 flex flex-row items-center justify-between">
+            <CardTitle className="text-base flex items-center gap-2">
+              <Cake className="h-4 w-4 text-blue-600" /> Personal Information
+            </CardTitle>
+            {canEdit && !isEditing && (
               <Button
                 variant="outline"
                 size="sm"
@@ -265,70 +330,50 @@ export default function EmployeeProfile({
                   setIsEditing(true);
                 }}
               >
-                Edit
+                Edit Details
               </Button>
             )}
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-6">
             {!isEditing ? (
-              <div className="grid gap-4 sm:grid-cols-2">
-                <div>
-                  <p className="text-xs text-muted-foreground">Date of Birth</p>
-                  <p className="text-sm font-medium">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-6">
+                <div className="space-y-1">
+                  <span className="text-xs font-medium text-muted-foreground">Date of Birth</span>
+                  <p className="text-sm font-semibold text-foreground">
                     {formatDate(employee.dob || employee.dateOfBirth)}
                   </p>
                 </div>
-                <div>
-                  <p className="text-xs text-muted-foreground">Status</p>
-                  <p className="text-sm font-medium uppercase">{employee.status || "ACTIVE"}</p>
+                <div className="space-y-1">
+                  <span className="text-xs font-medium text-muted-foreground">Gender</span>
+                  <p className="text-sm font-semibold capitalize text-foreground">
+                    {employee.gender || "—"}
+                  </p>
                 </div>
-                <div>
-                  <p className="text-xs text-muted-foreground">Phone</p>
-                  <p className="text-sm font-medium">{employee.phone || "—"}</p>
+                <div className="space-y-1">
+                  <span className="text-xs font-medium text-muted-foreground">Blood Group</span>
+                  <p className="text-sm font-semibold text-foreground">
+                    {employee.bloodGroup || "—"}
+                  </p>
                 </div>
-                <div>
-                  <p className="text-xs text-muted-foreground">Email</p>
-                  <p className="text-sm font-medium">{employee.email || "—"}</p>
+                <div className="space-y-1">
+                  <span className="text-xs font-medium text-muted-foreground">Account Status</span>
+                  <p className="text-sm font-semibold uppercase text-foreground">
+                    {employee.status || "ACTIVE"}
+                  </p>
                 </div>
-                <div>
-                  <p className="text-xs text-muted-foreground">Gender</p>
-                  <p className="text-sm font-medium capitalize">{employee.gender || "—"}</p>
-                </div>
-                <div>
-                  <p className="text-xs text-muted-foreground">Blood Group</p>
-                  <p className="text-sm font-medium">{employee.bloodGroup || "—"}</p>
-                </div>
-                <div className="sm:col-span-2">
-                  <p className="text-xs text-muted-foreground">Address</p>
-                  <p className="text-sm font-medium">{employee.address || "—"}</p>
+                <div className="col-span-2 sm:col-span-4 space-y-1">
+                  <span className="text-xs font-medium text-muted-foreground">Full Address</span>
+                  <p className="text-sm font-medium text-foreground">{employee.address || "—"}</p>
                 </div>
               </div>
             ) : (
               <div className="grid gap-4 sm:grid-cols-2">
-                <div>
-                  <p className="text-xs text-muted-foreground">Date of Birth</p>
-                  <p className="text-sm font-medium">
-                    {formatDate(employee.dob || employee.dateOfBirth)}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-xs text-muted-foreground">Status</p>
-                  <p className="text-sm font-medium uppercase">{employee.status || "ACTIVE"}</p>
-                </div>
-                <div>
-                  <p className="text-xs text-muted-foreground">Phone</p>
-                  <p className="text-sm font-medium">{employee.phone || "—"}</p>
-                </div>
-                <div>
-                  <p className="text-xs text-muted-foreground">Email</p>
-                  <p className="text-sm font-medium">{employee.email || "—"}</p>
-                </div>
                 <div className="space-y-2">
                   <Label>Gender</Label>
                   <select
                     value={editForm.gender}
                     onChange={(e) => setEditForm({ ...editForm, gender: e.target.value })}
-                    className="w-full px-3 py-2 border border-input rounded-md bg-background text-sm"
+                    className="w-full h-10 px-3 py-2 border border-input rounded-md bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring"
                   >
                     <option value="">Select gender</option>
                     <option value="male">Male</option>
@@ -351,7 +396,7 @@ export default function EmployeeProfile({
                     onChange={(e) => setEditForm({ ...editForm, address: e.target.value })}
                     placeholder="Street, city, state, postal code"
                     rows={2}
-                    className="w-full px-3 py-2 border border-input rounded-md bg-background text-sm"
+                    className="w-full px-3 py-2 border border-input rounded-md bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring"
                   />
                 </div>
               </div>
@@ -359,154 +404,154 @@ export default function EmployeeProfile({
           </CardContent>
         </Card>
 
-        {isOwnProfile && (
-          <>
-            <Card className="lg:col-span-2">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Briefcase className="h-4 w-4 text-blue-600" /> Work Information
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {!isEditing ? (
-                  <>
-                    <div>
-                      <p className="text-xs text-muted-foreground">Reporting Manager</p>
-                      <p className="text-sm font-medium">{employee.manager || "—"}</p>
-                    </div>
-                    <div>
-                      <p className="text-xs text-muted-foreground mb-2">Skills</p>
-                      <div className="flex flex-wrap gap-2">
-                        {employee.skills && employee.skills.length > 0 ? (
-                          employee.skills.map((skill: string) => (
-                            <Badge
-                              key={skill}
-                              variant="outline"
-                              className="bg-blue-50 text-blue-700 border-blue-200"
-                            >
-                              {skill}
-                            </Badge>
-                          ))
-                        ) : (
-                          <span className="text-sm text-muted-foreground">No skills added</span>
-                        )}
-                      </div>
-                    </div>
-                  </>
-                ) : (
-                  <div className="space-y-4">
-                    <div className="space-y-2">
-                      <Label>Reporting Manager</Label>
-                      <Input
-                        value={editForm.manager}
-                        onChange={(e) => setEditForm({ ...editForm, manager: e.target.value })}
-                        placeholder="Enter reporting manager name"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label>Skills</Label>
-                      <div className="flex gap-2">
-                        <Input
-                          value={skillInput}
-                          onChange={(e) => setSkillInput(e.target.value)}
-                          onKeyDown={(e) => {
-                            if (e.key === "Enter") {
-                              e.preventDefault();
-                              addSkill();
-                            }
-                          }}
-                          placeholder="Add a skill and press Enter"
-                        />
-                        <Button type="button" variant="outline" onClick={addSkill}>
-                          Add
-                        </Button>
-                      </div>
-                      <div className="flex flex-wrap gap-1.5 pt-2">
-                        {editForm.skills.length === 0 ? (
-                          <span className="text-xs text-muted-foreground">
-                            No skills added yet.
-                          </span>
-                        ) : (
-                          editForm.skills.map((skill: string) => (
-                            <Badge
-                              key={skill}
-                              variant="outline"
-                              className="bg-blue-50 text-blue-700 border-blue-200 cursor-pointer hover:bg-blue-100"
-                              onClick={() => removeSkill(skill)}
-                            >
-                              {skill} ✕
-                            </Badge>
-                          ))
-                        )}
-                      </div>
-                    </div>
+        {/* Work & Skills */}
+        <Card className="shadow-sm border-border">
+          <CardHeader className="bg-muted/30 pb-3">
+            <CardTitle className="text-base flex items-center gap-2">
+              <Briefcase className="h-4 w-4 text-blue-600" /> Work & Skills
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-6 space-y-4">
+            {!isEditing ? (
+              <>
+                <div className="space-y-1">
+                  <span className="text-xs font-medium text-muted-foreground">Reporting Manager</span>
+                  <p className="text-sm font-medium text-foreground">{employee.manager || "—"}</p>
+                </div>
+                <div className="space-y-2">
+                  <span className="text-xs font-medium text-muted-foreground">Skills & Expertise</span>
+                  <div className="flex flex-wrap gap-1.5">
+                    {employee.skills && employee.skills.length > 0 ? (
+                      employee.skills.map((skill: string) => (
+                        <Badge
+                          key={skill}
+                          variant="outline"
+                          className="bg-blue-50 text-blue-700 border-blue-200"
+                        >
+                          {skill}
+                        </Badge>
+                      ))
+                    ) : (
+                      <span className="text-sm text-muted-foreground">No skills added yet</span>
+                    )}
                   </div>
-                )}
-              </CardContent>
-            </Card>
-
-            <Card className="lg:col-span-2">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <ShieldAlert className="h-4 w-4 text-blue-600" /> Emergency Contact
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                {!isEditing ? (
-                  <div className="grid gap-4 sm:grid-cols-2">
-                    <div>
-                      <p className="text-xs text-muted-foreground">Contact Name</p>
-                      <p className="text-sm font-medium">{employee.emergencyContactName || "—"}</p>
-                    </div>
-                    <div>
-                      <p className="text-xs text-muted-foreground">Contact Phone</p>
-                      <p className="text-sm font-medium">{employee.emergencyContactPhone || "—"}</p>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="grid gap-4 sm:grid-cols-2">
-                    <div className="space-y-2">
-                      <Label>Contact Name</Label>
-                      <Input
-                        value={editForm.emergencyContactName}
-                        onChange={(e) =>
-                          setEditForm({ ...editForm, emergencyContactName: e.target.value })
+                </div>
+              </>
+            ) : (
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label>Reporting Manager</Label>
+                  <Input
+                    value={editForm.manager}
+                    onChange={(e) => setEditForm({ ...editForm, manager: e.target.value })}
+                    placeholder="Enter reporting manager name"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Skills</Label>
+                  <div className="flex gap-2">
+                    <Input
+                      value={skillInput}
+                      onChange={(e) => setSkillInput(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          e.preventDefault();
+                          addSkill();
                         }
-                        placeholder="Emergency contact name"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label>Contact Phone</Label>
-                      <Input
-                        value={editForm.emergencyContactPhone}
-                        onChange={(e) =>
-                          setEditForm({ ...editForm, emergencyContactPhone: e.target.value })
-                        }
-                        placeholder="Emergency contact phone"
-                      />
-                    </div>
+                      }}
+                      placeholder="Add a skill and press Enter"
+                    />
+                    <Button type="button" variant="outline" onClick={addSkill}>
+                      Add
+                    </Button>
                   </div>
-                )}
-              </CardContent>
-            </Card>
-
-            {isEditing && (
-              <Card className="lg:col-span-2">
-                <CardContent className="pt-6 flex gap-2 justify-end">
-                  <Button variant="outline" onClick={() => setIsEditing(false)} disabled={isSaving}>
-                    Cancel
-                  </Button>
-                  <Button
-                    className="bg-blue-600 hover:bg-blue-700 text-white"
-                    onClick={handleSave}
-                    disabled={isSaving}
-                  >
-                    {isSaving ? "Saving..." : "Save Changes"}
-                  </Button>
-                </CardContent>
-              </Card>
+                  <div className="flex flex-wrap gap-1.5 pt-2">
+                    {editForm.skills.length === 0 ? (
+                      <span className="text-xs text-muted-foreground">
+                        No skills added yet.
+                      </span>
+                    ) : (
+                      editForm.skills.map((skill: string) => (
+                        <Badge
+                          key={skill}
+                          variant="outline"
+                          className="bg-blue-50 text-blue-700 border-blue-200 cursor-pointer hover:bg-blue-100"
+                          onClick={() => removeSkill(skill)}
+                        >
+                          {skill} ✕
+                        </Badge>
+                      ))
+                    )}
+                  </div>
+                </div>
+              </div>
             )}
-          </>
+          </CardContent>
+        </Card>
+
+        {/* Emergency Contact */}
+        <Card className="shadow-sm border-border">
+          <CardHeader className="bg-muted/30 pb-3">
+            <CardTitle className="text-base flex items-center gap-2">
+              <ShieldAlert className="h-4 w-4 text-blue-600" /> Emergency Contact
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-6 space-y-4">
+            {!isEditing ? (
+              <div className="space-y-4">
+                <div className="space-y-1">
+                  <span className="text-xs font-medium text-muted-foreground">Contact Person</span>
+                  <p className="text-sm font-semibold text-foreground">
+                    {employee.emergencyContactName || "—"}
+                  </p>
+                </div>
+                <div className="space-y-1">
+                  <span className="text-xs font-medium text-muted-foreground">Contact Phone</span>
+                  <p className="text-sm font-semibold text-foreground">
+                    {employee.emergencyContactPhone || "—"}
+                  </p>
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label>Contact Name</Label>
+                  <Input
+                    value={editForm.emergencyContactName}
+                    onChange={(e) =>
+                      setEditForm({ ...editForm, emergencyContactName: e.target.value })
+                    }
+                    placeholder="Emergency contact name"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Contact Phone</Label>
+                  <Input
+                    value={editForm.emergencyContactPhone}
+                    onChange={(e) =>
+                      setEditForm({ ...editForm, emergencyContactPhone: e.target.value })
+                    }
+                    placeholder="Emergency contact phone"
+                  />
+                </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {isEditing && (
+          <div className="md:col-span-2 flex gap-3 justify-end pt-2">
+            <Button variant="outline" onClick={() => setIsEditing(false)} disabled={isSaving}>
+              Cancel
+            </Button>
+            <Button
+              className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm"
+              onClick={handleSave}
+              disabled={isSaving}
+            >
+              {isSaving ? "Saving..." : "Save Changes"}
+            </Button>
+          </div>
         )}
       </div>
     </div>

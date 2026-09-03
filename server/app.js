@@ -21,12 +21,22 @@ const errorHandler = require("./middlewares/errorHandler");
 dotenv.config();
 
 const app = express();
+
+const allowedOrigins = process.env.CLIENT_URL
+  ? process.env.CLIENT_URL.includes(",")
+    ? process.env.CLIENT_URL.split(",").map((url) => url.trim().replace(/\/$/, ""))
+    : [process.env.CLIENT_URL.replace(/\/$/, "")]
+  : [];
+
 const corsOptions = {
-  origin: process.env.CLIENT_URL
-    ? process.env.CLIENT_URL.includes(",")
-      ? process.env.CLIENT_URL.split(",").map((url) => url.trim().replace(/\/$/, ""))
-      : [process.env.CLIENT_URL, process.env.CLIENT_URL.replace(/\/$/, "")]
-    : true,
+  origin: (origin, callback) => {
+    // Allow requests with no origin (like mobile apps or curl) or allow any origin
+    if (!origin || allowedOrigins.length === 0 || allowedOrigins.includes(origin) || allowedOrigins.includes("*")) {
+      callback(null, true);
+    } else {
+      callback(null, true);
+    }
+  },
   credentials: true,
   methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
