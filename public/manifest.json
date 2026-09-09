@@ -1,7 +1,7 @@
 {
   "short_name": "Mahes Bankers",
   "name": "Mahes Bankers Employee Portal",
-  "description": "Employee Portal for Mahes Bankers - Attendance, Leaves, and Chat.",
+  "description": "Employee Portal for Mahes Bankers - Attendance and Employee Management.",
   "icons": [
     {
       "src": "/icons/icon-192.png",

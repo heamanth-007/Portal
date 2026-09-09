@@ -4,9 +4,7 @@ import {
   Clock,
   CalendarDays,
   User as UserIcon,
-  MessageSquare,
   Users,
-  CheckSquare,
   LogOut,
   Menu,
   Settings,
@@ -25,9 +23,7 @@ import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/s
 const employeeNav = [
   { to: "/app/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { to: "/app/attendance", label: "Attendance", icon: Clock },
-  { to: "/app/leave", label: "Leave", icon: CalendarDays },
   { to: "/app/holidays", label: "Holidays", icon: CalendarDays },
-  { to: "/app/chat", label: "Team Chat", icon: MessageSquare },
   { to: "/app/profile", label: "Profile", icon: UserIcon },
 ];
 
@@ -36,9 +32,7 @@ const adminNav = [
   { to: "/app/admin/employees", label: "Employees", icon: Users },
   { to: "/app/admin/attendance", label: "Attendance", icon: Clock },
   { to: "/app/admin/holidays", label: "Holidays", icon: CalendarDays },
-  { to: "/app/admin/approvals", label: "Approvals", icon: CheckSquare },
   { to: "/app/admin/settings", label: "Settings", icon: Settings },
-  { to: "/app/chat", label: "Team Chat", icon: MessageSquare },
   { to: "/app/profile", label: "Profile", icon: UserIcon },
 ];
 
@@ -59,10 +53,6 @@ export function AppShell({ children }: { children: ReactNode }) {
     setIsIOS(/iPad|iPhone|iPod/.test(userAgent) && !(window as any).MSStream);
     setIsSafari(/^((?!chrome|android).)*safari/i.test(userAgent));
   }, []);
-
-  const unreadMessagesCount = state.messages.filter(
-    (m) => currentUser && !m.readBy?.includes(currentUser.id),
-  ).length;
 
   const initials = currentUser?.name
     .split(" ")
@@ -102,12 +92,6 @@ export function AppShell({ children }: { children: ReactNode }) {
                 )}
                 <div className="relative flex items-center justify-center">
                   <Icon className="h-4 w-4" />
-                  {item.to === "/app/chat" && unreadMessagesCount > 0 && (
-                    <span className="absolute -top-1 -right-1 flex h-2 w-2">
-                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                      <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
-                    </span>
-                  )}
                 </div>
                 {item.label}
               </Link>
@@ -224,12 +208,6 @@ export function AppShell({ children }: { children: ReactNode }) {
                         )}
                         <div className="relative flex items-center justify-center">
                           <Icon className="h-4 w-4" />
-                          {item.to === "/app/chat" && unreadMessagesCount > 0 && (
-                            <span className="absolute -top-1 -right-1 flex h-2 w-2">
-                              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                              <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
-                            </span>
-                          )}
                         </div>
                         {item.label}
                       </Link>

@@ -1,8 +1,10 @@
-const CACHE_NAME = "gemshine-portal-v1";
+const CACHE_NAME = "mahesbankers-portal-v3";
 const ASSETS_TO_CACHE = [
   "/",
   "/index.html",
   "/manifest.json",
+  "/logo.png",
+  "/favicon.png",
   "/icons/icon-192.png",
   "/icons/icon-512.png",
 ];

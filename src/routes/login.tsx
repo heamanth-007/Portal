@@ -54,8 +54,8 @@ function LoginPage() {
         <div className="absolute -bottom-24 -right-24 h-96 w-96 rounded-full bg-white/10 blur-3xl" />
         <div className="absolute -top-24 -left-24 h-72 w-72 rounded-full bg-white/10 blur-3xl" />
         <div className="relative flex items-center gap-3">
-          <div className="h-11 w-11 rounded-xl bg-white p-1 shadow-md flex items-center justify-center">
-            <img src="/logo.svg" alt="Mahes Bankers" className="h-full w-full object-contain" />
+          <div className="h-11 w-9 rounded-xl bg-white p-1 shadow-md flex items-center justify-center overflow-hidden shrink-0">
+            <img src="/logo.png" alt="Mahes Bankers" className="h-full w-full object-contain" />
           </div>
           <div className="flex flex-col">
             <span className="text-lg font-bold tracking-tight text-white">Mahes Bankers</span>
@@ -67,11 +67,11 @@ function LoginPage() {
             One portal for your team's day.
           </h1>
           <p className="text-sm text-white/90 leading-relaxed">
-            Attendance, leave management, and team chat — all in one modern, secure workspace built
+            Fast daily check-in, geofenced attendance tracking, and employee management built
             for Mahes Bankers.
           </p>
           <div className="grid grid-cols-3 gap-3 pt-4">
-            {["Attendance", "Leave Mgmt", "Team Chat"].map((label) => (
+            {["Attendance", "Geofencing", "Employees"].map((label) => (
               <div
                 key={label}
                 className="rounded-lg border border-white/20 bg-white/10 backdrop-blur-sm px-3 py-2.5 text-xs font-semibold text-center"

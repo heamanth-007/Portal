@@ -14,10 +14,10 @@ export function CompanyLogo({
   iconOnly = false,
 }: CompanyLogoProps) {
   const iconSizes = {
-    sm: "h-7 w-7",
-    md: "h-9 w-9",
-    lg: "h-12 w-12",
-    xl: "h-16 w-16",
+    sm: "h-8 w-6.5",
+    md: "h-9 w-7.5",
+    lg: "h-12 w-10",
+    xl: "h-16 w-13",
   };
 
   const textSizes = {
@@ -36,9 +36,9 @@ export function CompanyLogo({
 
   return (
     <div className={`flex items-center gap-2.5 ${className}`}>
-      <div className={`relative ${iconSizes[size]} shrink-0 rounded-lg overflow-hidden bg-white/95 p-1 shadow-sm border border-orange-500/20 flex items-center justify-center`}>
+      <div className={`relative ${iconSizes[size]} shrink-0 rounded-lg overflow-hidden bg-white p-1 shadow-sm border border-orange-500/20 flex items-center justify-center`}>
         <img
-          src="/logo.svg"
+          src="/logo.png"
           alt="Mahes Bankers Logo"
           className="h-full w-full object-contain"
         />

@@ -212,7 +212,6 @@ function EmployeeDashboard() {
   const todayAttendance = state.attendance.find(
     (a) => a.userId === currentUser.id && a.date === todayDate,
   );
-  const myLeaves = state.leaves.filter((l) => l.userId === currentUser.id);
 
   const hasCheckedIn = !!todayRecord?.checkInTime || !!todayAttendance?.checkIn;
   const hasCheckedOut = !!todayRecord?.checkOutTime || !!todayAttendance?.checkOut;
@@ -299,8 +298,8 @@ function EmployeeDashboard() {
           icon={<CheckCircle2 className="h-4 w-4" />}
         />
         <StatCard
-          label="Leave balance"
-          value={`${currentUser.leaveBalance} days`}
+          label="Office Shift"
+          value="09:00 - 18:00"
           icon={<CalendarDays className="h-4 w-4" />}
         />
       </div>
@@ -403,21 +402,38 @@ function EmployeeDashboard() {
 
         <Card className="shadow-sm border-border">
           <CardHeader>
-            <CardTitle className="text-base font-semibold">Recent Leave Requests</CardTitle>
+            <CardTitle className="text-base font-semibold">Quick Actions</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
-            {myLeaves.slice(0, 5).map((l) => (
-              <div key={l.id} className="flex items-center justify-between">
-                <div className="text-sm">
-                  <div className="font-medium">Leave · {l.fromDate}</div>
-                  <div className="text-xs text-muted-foreground truncate">{l.reason}</div>
+            <a
+              href="/app/attendance"
+              className="flex items-center justify-between p-3 rounded-lg border border-border/70 hover:bg-accent/40 transition-colors"
+            >
+              <div className="flex items-center gap-3">
+                <div className="h-9 w-9 rounded-lg bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center">
+                  <Clock className="h-4 w-4" />
                 </div>
-                <StatusBadge status={l.status} />
+                <div>
+                  <div className="text-sm font-semibold">My Attendance Logs</div>
+                  <div className="text-xs text-muted-foreground">Monthly calendar & punch history</div>
+                </div>
               </div>
-            ))}
-            {myLeaves.length === 0 && (
-              <div className="text-sm text-muted-foreground">No leave requests yet.</div>
-            )}
+            </a>
+
+            <a
+              href="/app/holidays"
+              className="flex items-center justify-between p-3 rounded-lg border border-border/70 hover:bg-accent/40 transition-colors"
+            >
+              <div className="flex items-center gap-3">
+                <div className="h-9 w-9 rounded-lg bg-orange-500/10 text-orange-600 dark:text-orange-400 flex items-center justify-center">
+                  <CalendarDays className="h-4 w-4" />
+                </div>
+                <div>
+                  <div className="text-sm font-semibold">Holiday Calendar</div>
+                  <div className="text-xs text-muted-foreground">Company public holidays & leaves</div>
+                </div>
+              </div>
+            </a>
           </CardContent>
         </Card>
       </div>
